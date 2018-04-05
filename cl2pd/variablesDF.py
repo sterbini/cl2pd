@@ -1,6 +1,6 @@
 import pandas as pd
 
-varDF=pd.DataFrame([['LHC.BOFSU:OFC_ENERGY','Energy','NUMERIC',True],
+LHCDF=pd.DataFrame([['LHC.BOFSU:OFC_ENERGY','Energy','NUMERIC',True],
               ['LHC.BCTFR.A6R4.B1:BEAM_INTENSITY','Intensity','NUMERIC',False],
               ['LHC.BCTFR.A6R4.B2:BEAM_INTENSITY','Intensity','NUMERIC',False],
               ['LHC.RUNCONFIG:IP1-XING-V-MURAD','Crossing angle','NUMERIC',True],
