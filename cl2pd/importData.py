@@ -8,7 +8,7 @@ cals=pytimber.LoggingDB()
 
 def _cals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     '''
-    It is a cals2pd without spliting feature.
+    It is a cals2pd without splitting feature.
 
     This function is supposed to be private.
 
@@ -73,14 +73,14 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
 
     This is the most important function of the importData class.
 
-    t1 and t2 are pandas datetime. We enocurage to use "time zone", tz , aware expression (see example).
+    t1 and t2 are pandas datetime. We encourage to use "time zone", tz , aware expression (see example).
     Tz-naive expressions (without explicit time zone) will be consider UTC-localized.
 
-    *cals2pd* returns a pandas dataframe of the listOfVariables within the interval [t1,t2].
+    It returns a pandas dataframe of the listOfVariables within the interval [t1,t2].
     The index timestamps of the output dataframe are UTC-localized.
 
-    *cals2pd* can be used to filter fundamentals (especially intended for the injectors).
-    *cals2pd* can be used in the verbose mode if the corresponding flag is True.
+    It can be used to filter fundamentals (especially intended for the injectors).
+    It can be used in the verbose mode if the corresponding flag is True.
 
     ===Example===     
 
