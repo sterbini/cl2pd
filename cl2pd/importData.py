@@ -1,3 +1,5 @@
+cals=cl2pd.cals
+
 def _cals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     '''
     It is a cals2pd without spliting feature.
