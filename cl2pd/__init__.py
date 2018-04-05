@@ -1,10 +1,10 @@
-import pandas as pd 
-import numpy as np
+#import pandas as pd 
+#import numpy as np
 # Fundamental contribution by R. De Maria et al.
-import pytimber
+#import pytimber
 
 # TODO: discuss about the possible problem if the user has already defined a variable named 'cals' 
-cals=pytimber.LoggingDB()
+#cals=pytimber.LoggingDB()
 
 class dotdict(dict):
     '''
