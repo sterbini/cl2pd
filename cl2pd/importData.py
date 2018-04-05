@@ -86,13 +86,13 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
     if split<1: split=1
 
     if split==1: 
-        myDF=importData._cals2pd(listOfVariables, t1, t2, fundamental, verbose)
+        myDF=_cals2pd(listOfVariables, t1, t2, fundamental, verbose)
     else:
         times= pd.to_datetime(np.linspace(t1.value, t2.value, split+1))
         myDF=pd.DataFrame()
         for i in range(len(times)-1):
             if verbose: print('Time window: '+str(i+1)) 
-            aux=importData._cals2pd(listOfVariables,times[i],times[i+1], fundamental=fundamental, verbose=verbose)
+            aux=_cals2pd(listOfVariables,times[i],times[i+1], fundamental=fundamental, verbose=verbose)
             myDF=pd.concat([myDF,aux])
     return myDF.sort_index(axis=1)
 
