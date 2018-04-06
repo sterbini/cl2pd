@@ -6,7 +6,7 @@ import pytimber
 # TODO: discuss about the possible problem if the user has already defined a variable named 'cals' 
 cals=pytimber.LoggingDB()
 
-def _cals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
+def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     '''
     It is a cals2pd without splitting feature.
 
@@ -19,15 +19,6 @@ def _cals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     It can be used in the verbose mode if the corresponding flag is True.
     It can be used to filter fundamentals (especially intended for the injectors).
     The index timestamps of the output are UTC-localized.
-
-    ===Example===     
-
-    # you can use different timezone, in this example we use Central European Time (local time at CERN).
-    t1 = pd.Timestamp('2017-10-01 17:30', tz='CET')
-    t2 = pd.Timestamp('2017-10-01 17:31', tz='CET')
-    raw_data = importData.cals2pd(variables,t1,t2)
-    # By default the index timezone is UTC but, even if not encouraged, you can chance the index time zone.
-    raw_data.index=raw_data.index.tz_convert('CET')
     '''
 
     if t1.tz==None:
@@ -39,7 +30,7 @@ def _cals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
 
     if not isinstance(t2, str):
         if t2.tz==None:
-            if verbose: print('t1 is UTC localized.')
+            if verbose: print('t2 is UTC localized.')
             t2=t2.tz_localize('UTC')
         # pyTimber needs CET as internal variable
         t2=t2.astimezone('CET')
@@ -94,13 +85,13 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
     if split<1: split=1
 
     if split==1: 
-        myDF=_cals2pd(listOfVariables, t1, t2, fundamental, verbose)
+        myDF=_noSplitcals2pd(listOfVariables, t1, t2, fundamental, verbose)
     else:
         times= pd.to_datetime(np.linspace(t1.value, t2.value, split+1))
         myDF=pd.DataFrame()
         for i in range(len(times)-1):
             if verbose: print('Time window: '+str(i+1)) 
-            aux=_cals2pd(listOfVariables,times[i],times[i+1], fundamental=fundamental, verbose=verbose)
+            aux=_noSplitcals2pd(listOfVariables,times[i],times[i+1], fundamental=fundamental, verbose=verbose)
             myDF=pd.concat([myDF,aux])
     return myDF.sort_index(axis=1)
 
