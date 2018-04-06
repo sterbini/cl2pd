@@ -7,7 +7,7 @@ You can install the package, for instance on the SWAN terminal (www.swan.cern.ch
 pip install --user git+https://github.com/sterbini/cl2pd.git
 ```
 
-## Example file 
+## Example notebook 
 Please have a look to this example file
 
 /eos/user/s/sterbini/MD_ANALYSIS/cl2pdExaple.ipynb 
