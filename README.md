@@ -2,7 +2,7 @@
 A simple package to convert CERN Logging information (using pytimber/CALS, mat-files, massi-files, TFS-files) into pandas dataframes.
 
 ## Install the package
-You can install the package, for instance on the SWAN terminal (www.swan.cern.ch) using:
+You can install the package, for instance on the SWAN terminal (www.swan.cern.ch), using:
 ```
 pip install --user git+https://github.com/sterbini/cl2pd.git
 ```
