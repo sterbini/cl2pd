@@ -72,6 +72,7 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
 
     It can be used to filter fundamentals (especially intended for the injectors).
     It can be used in the verbose mode if the corresponding flag is True.
+    The data extraction can be done splitting it in several n intervals (split=n). 
 
     ===Example===     
 
