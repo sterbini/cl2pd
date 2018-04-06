@@ -22,16 +22,16 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     '''
 
     if t1.tz==None:
-        if verbose: print('t1 is UTC localized.')
         t1=t1.tz_localize('UTC')
+        if verbose: print('t1 is UTC localized: ' + str(t1))
 
     # pyTimber needs CET as internal variable
     t1=t1.astimezone('CET')
 
     if not isinstance(t2, str):
         if t2.tz==None:
-            if verbose: print('t2 is UTC localized.')
             t2=t2.tz_localize('UTC')
+            if verbose: print('t2 is UTC localized: '+ str(t2))
         # pyTimber needs CET as internal variable
         t2=t2.astimezone('CET')
 
