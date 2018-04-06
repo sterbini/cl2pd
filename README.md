@@ -18,7 +18,7 @@ https://cernbox.cern.ch/index.php/s/FwLf6IDEJ6Ypdke
 
 ## Minimal example
 
-```
+```python
 import cl2pd
 from cl2pd import importData
 pd=importData.pd     #is the pandas package
