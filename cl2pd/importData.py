@@ -479,7 +479,7 @@ class _TFS:
             if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])  ):  
                 exec "self."+alllabels[j]+"= np.array(self."+alllabels[j]+")" 
 
-def TFS2pd(file):
+def tfs2pd(file):
         '''
         Import a MADX TFS file in a pandas dataframe.
         
