@@ -303,11 +303,11 @@ def massiFile2pd(myFileName, myUnzipPath='/tmp'):
     return massiFile[['FILL','Stable Beam Flag','Experiment','Bunch','Luminosity [Hz/ub]','P2P luminosity error [Hz/ub]',
               'Specific luminosity [Hz/ub]','P2P specific luminosity [Hz/ub]']]
 
-def fillCSV2pd(myFile):
+def calsCSV2pd(myFile):
     '''
-    Convert fill-CVS file in a pd DataFrame.
+    Convert cals CVS file in a pd DataFrame.
 
-    The files are of the type in /eos/project/l/lhc-lumimod/LuminosityFollowUp/2017/dataFiles/
+    The files are of the type in /eos/project/l/lhc-lumimod/
     UTC time is always assumed.
     '''
     # I read the full file once to have the line numbers when a new variable starts, its name and its type
