@@ -416,7 +416,8 @@ def mat2pd(variablesList,filesList, verbose=False, matlabFullInfo=False):
     return myDataFrame.sort_index(axis=1).sort_index(axis=0)
 
 class _TFS:
-    '''TFS parameters from MADX TFS output.
+    '''
+       TFS parameters from MADX TFS output.
        The approach used is mainly inherithed from the class TWISS suggested by H. Bartosik.
     '''
                 
