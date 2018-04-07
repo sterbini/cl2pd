@@ -1,3 +1,5 @@
+import pandas as pd 
+
 def fuseDF(df1,df2):
     myDF=pd.DataFrame()
     for i in sorted(np.unique(list(df1.columns)+list(df2.columns))):
