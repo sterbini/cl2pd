@@ -1,4 +1,6 @@
 import pandas as pd 
+import numpy as np 
+
 
 def fuseDF(df1,df2):
     myDF=pd.DataFrame()
