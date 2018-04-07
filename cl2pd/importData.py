@@ -393,7 +393,7 @@ def mat2pd(variablesList,filesList, verbose=False, matlabFullInfo=False):
     for i in filesList:
         if verbose:
             print(i)
-        data=importData.mat2dict(i);
+        data=mat2dict(i);
         if matlabFullInfo:
             matlabObject.append(data)
         localCycleStamp=np.max(data.headerCycleStamps);
