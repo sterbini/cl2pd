@@ -6,6 +6,10 @@ You can install the package, for instance on the SWAN terminal (www.swan.cern.ch
 ```
 pip install --user git+https://github.com/sterbini/cl2pd.git
 ```
+or to upgrade it
+```
+pip install --upgrade --user git+https://github.com/sterbini/cl2pd.git
+```
 
 ## Example notebook 
 Please have a look to this example file
