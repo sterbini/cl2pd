@@ -99,7 +99,7 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
 def cycleStamp2pd(variablesList,cycleStampList,verbose=False):
     '''
     Return a pandas DataFrame with the specified variables and cyclestamps.
-    This can be significantly slow.
+    This can be significantly slow since it accesses CALS for each cyclestamp.
 
     ===Example===     
     startTime=pd.Timestamp('2018-03-27 06:00')
@@ -113,8 +113,8 @@ def cycleStamp2pd(variablesList,cycleStampList,verbose=False):
     for i in cycleStampList:
         if verbose:
             print(i)
-        aux=importData.cals2pd(variablesList,i,i)
-        myDF=utilityFunctions.concatDF(myDF,aux)
+        aux=cals2pd(variablesList,i,i)
+        myDF=pd.combine_first(aux)
     return myDF        
 
 def LHCFillsByTime(t1,t2, verbose=False):
