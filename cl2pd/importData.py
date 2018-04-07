@@ -1,5 +1,8 @@
 import pandas as pd 
 import numpy as np
+from string import split
+from string import replace
+import os
 # Fundamental contribution by R. De Maria et al.
 import pytimber
 
@@ -411,3 +414,124 @@ def mat2pd(variablesList,filesList, verbose=False, matlabFullInfo=False):
     for j in variablesList:
         exec('myDataFrame[\'' + j + '\']=pd.Series(' +j.replace('.','_')+ ',cycleStampList)')   
     return myDataFrame.sort_index(axis=1).sort_index(axis=0)
+
+class _TFS:
+    '''TFS parameters from MADX TFS output.
+       The approach used is mainly inherithed from the class TWISS suggested by H. Bartosik.
+    '''
+                
+    def __init__(self, filename): 
+        self.indx={}
+        self.keys=[]
+        alllabels=[]
+        #if '.gz' in filename:
+        #    f=gzip.open(filename, 'rb')
+        #else:
+        f=open(filename, 'r')
+            
+        for line in f:
+            if ("@ " not in line and "@" in line): 
+                line = replace(line, "@" , "@ ")
+            if ("@ " in line and "%" in line and "s" not in split(line)[2]) :
+                label=split(line)[1]
+                try:
+                    exec("self."+label+"= "+str(float(split(replace(line, '"', ''))[3])))
+                except:
+                    print("Problem parsing: "+ line)
+                    print("Going to be parsed as string")
+                    try:
+                        exec("self."+label+"= \""+replace(split(line)[3], '"', '')+"\"")
+                    except:
+                        print("Problem persits, let's ignore it!")
+            elif ("@ " in line and "s"  in split(line)[2]):
+                label=split(line)[1].replace(":","")
+                exec("self."+label+"= \""+split(replace(line, '"', ''))[3]+"\"")
+
+            if ("* " in line or "*\t" in line) :
+                    alllabels=split(line)
+                    for j in range(1,len(alllabels)):
+                        exec("self."+alllabels[j]+"= []")
+                        self.keys.append(alllabels[j])
+                            
+            if ("$ " in line or "$\t" in line) :
+                alltypes=split(line)                
+
+            if ("@" not in line and "*" not in line and "$" not in line) :
+                values=split(line)
+                for j in range(0,len(values)):
+                    if ("%hd" in alltypes[j+1]):                      
+                        exec("self."+alllabels[j+1]+".append("+str(int(values[j]))+")")                 
+                    if ("%le" in alltypes[j+1]):                      
+                        exec("self."+alllabels[j+1]+".append("+str(float(values[j]))+")")
+                    if ("s" in alltypes[j+1]):
+                        try:
+                            exec("self."+alllabels[j+1]+".append("+values[j]+")")
+                        except:
+                            exec("self."+alllabels[j+1]+".append(\""+values[j]+"\")") #To allow with or without ""
+                        if "NAME"==alllabels[j+1]:
+                            self.indx[replace(values[j], '"', '')]=len(self.NAME)-1
+                            self.indx[replace(values[j], '"', '').upper()]=len(self.NAME)-1
+                            self.indx[replace(values[j], '"', '').lower()]=len(self.NAME)-1
+
+        f.close()
+        
+        for j in range(1,len(alllabels)):
+            if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])  ):  
+                exec "self."+alllabels[j]+"= np.array(self."+alllabels[j]+")" 
+
+def TFS2pd(file):
+        '''
+        Import a MADX TFS file in a pandas dataframe.
+        
+        ===Example=== 
+        aux=TFS2pd('/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey')
+        '''
+        a=_TFS(file);
+        aux=[]
+        aux1=[]
+
+        for i in dir(a):
+            if not i[0]=='_':
+                if type(getattr(a,i)) is float:
+                    #print(i + ":"+ str(type(getattr(a,i))))
+                    aux.append(i)
+                    aux1.append(getattr(a,i))
+                if type(getattr(a,i)) is str:
+                    #print(i + ":"+ str(type(getattr(a,i))))
+                    aux.append(i)
+                    aux1.append(getattr(a,i))
+
+        myList=[]
+        myColumns=[]
+        for i in a.keys:
+            myContainer=getattr(a, i)
+            if len(myContainer)==0:
+                print("The column "+ i + ' is empty.')
+            else:
+                myColumns.append(i)
+                myList.append(myContainer)
+                
+        optics=pd.DataFrame(np.transpose(myList), index=a.S,columns=myColumns)
+
+        for i in optics.columns:
+            aux3= optics.iloc[0][i]
+            if type(aux3) is str:
+                aux3=str.replace(aux3, '+', '')
+                aux3=str.replace(aux3, '-', '')
+                aux3=str.replace(aux3, '.', '')
+                aux3=str.replace(aux3, 'e', '')
+                aux3=str.replace(aux3, 'E', '')
+
+
+                if aux3.isdigit():
+                    optics[i]=optics[i].apply(np.double)
+
+        aux.append('FILE_NAME')
+        aux1.append(os.path.abspath(file))
+
+        aux.append('TABLE')
+        aux1.append(optics)
+
+        globalDF=pd.DataFrame([aux1], columns=aux)
+
+        return globalDF 
