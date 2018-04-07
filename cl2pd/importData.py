@@ -114,7 +114,7 @@ def cycleStamp2pd(variablesList,cycleStampList,verbose=False):
         if verbose:
             print(i)
         aux=cals2pd(variablesList,i,i)
-        myDF=pd.combine_first(aux)
+        myDF=myDF.combine_first(aux)
     return myDF        
 
 def LHCFillsByTime(t1,t2, verbose=False):
