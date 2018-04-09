@@ -1,5 +1,7 @@
 # cl2pd
-A simple package to convert CERN Logging information (using pytimber/CALS, mat-files, massi-files, TFS-files) into pandas dataframes.
+A simple package to convert CERN Logging information (using pytimber/CALS, mat-files, massi-files, TFS-files) into a pandas dataframe. This data type is very conveninient to represent time series and it offers a large set of methods to manage missing data, to do data aggregation and group operation, to perform data wrangling, to plots data, etc...
+For a schematic and succinct introduction to pandas please refers for example to 
+http://datasciencefree.com/pandas.pdf
 
 ## Install the package
 You can install the package, for instance on the SWAN terminal (www.swan.cern.ch), using:
