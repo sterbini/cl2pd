@@ -5,7 +5,7 @@ This data type is very conveninient to represent time series and it offers a lar
 For a schematic and succinct introduction to pandas please refers for example to 
 http://datasciencefree.com/pandas.pdf.
 
-An important source of inspiration was the package by **pytimber**  R. De Maria et al. and their generous approach in sharing tools and foster collaborations.
+An important source of inspiration was the package **pytimber** by R. De Maria et al. and their generous approach in sharing tools and foster collaborations.
 
 ## Install the package
 You can install the package, for instance on the SWAN terminal (www.swan.cern.ch), using:
