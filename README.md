@@ -16,6 +16,10 @@ or to upgrade it
 ```
 pip install --upgrade --user git+https://github.com/sterbini/cl2pd.git
 ```
+or to upgrade a fork of the project
+```
+pip install --upgrade --user git+https://github.com/sterbini/cl2pd.git@fork_name
+```
 
 ## Example notebook 
 Please have a look to this example file
