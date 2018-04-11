@@ -1,7 +1,5 @@
 import pandas as pd 
 import numpy as np
-from string import split
-from string import replace
 import os
 # Fundamental contribution by R. De Maria et al.
 import pytimber
@@ -420,7 +418,8 @@ class _TFS:
        TFS parameters from MADX TFS output.
        The approach used is mainly inherithed from the class TWISS suggested by H. Bartosik.
     '''
-                
+    from string import split
+    from string import replace            
     def __init__(self, filename): 
         self.indx={}
         self.keys=[]
