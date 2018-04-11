@@ -478,7 +478,7 @@ class _TFS:
         
         for j in range(1,len(alllabels)):
             if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])  ):  
-                exec "self."+alllabels[j]+"= np.array(self."+alllabels[j]+")" 
+                exec("self."+alllabels[j]+"= np.array(self."+alllabels[j]+")") 
 
 def tfs2pd(file):
         '''
