@@ -416,10 +416,9 @@ def mat2pd(variablesList,filesList, verbose=False, matlabFullInfo=False):
 class _TFS:
     '''
        TFS parameters from MADX TFS output.
-       The approach used is mainly inherithed from the class TWISS suggested by H. Bartosik.
+       The approach used is mainly inherithed from the class TWISS suggested by H. Bartosik et al.
     '''
-    from string import split
-    from string import replace            
+           
     def __init__(self, filename): 
         self.indx={}
         self.keys=[]
@@ -432,32 +431,32 @@ class _TFS:
         for line in f:
             if ("@ " not in line and "@" in line): 
                 line = replace(line, "@" , "@ ")
-            if ("@ " in line and "%" in line and "s" not in split(line)[2]) :
-                label=split(line)[1]
+            if ("@ " in line and "%" in line and "s" not in line.split()[2]) :
+                label=line.split()[1]
                 try:
-                    exec("self."+label+"= "+str(float(split(replace(line, '"', ''))[3])))
+                    exec("self."+label+"= "+str(float((line.replace( '"', '')).split()[3])))
                 except:
                     print("Problem parsing: "+ line)
                     print("Going to be parsed as string")
                     try:
-                        exec("self."+label+"= \""+replace(split(line)[3], '"', '')+"\"")
+                        exec("self."+label+"= \""+(line.split()[3]).replace( '"', '')+"\"")
                     except:
                         print("Problem persits, let's ignore it!")
-            elif ("@ " in line and "s"  in split(line)[2]):
-                label=split(line)[1].replace(":","")
-                exec("self."+label+"= \""+split(replace(line, '"', ''))[3]+"\"")
+            elif ("@ " in line and "s"  in line.split()[2]):
+                label=(line.split()[1]).replace(":","")
+                exec("self."+label+"= \""+(line.replace('"', '')).split()[3]+"\"")
 
             if ("* " in line or "*\t" in line) :
-                    alllabels=split(line)
+                    alllabels=line.split()
                     for j in range(1,len(alllabels)):
                         exec("self."+alllabels[j]+"= []")
                         self.keys.append(alllabels[j])
                             
             if ("$ " in line or "$\t" in line) :
-                alltypes=split(line)                
+                alltypes=line.split()                
 
             if ("@" not in line and "*" not in line and "$" not in line) :
-                values=split(line)
+                values=line.split()   
                 for j in range(0,len(values)):
                     if ("%hd" in alltypes[j+1]):                      
                         exec("self."+alllabels[j+1]+".append("+str(int(values[j]))+")")                 
@@ -469,15 +468,15 @@ class _TFS:
                         except:
                             exec("self."+alllabels[j+1]+".append(\""+values[j]+"\")") #To allow with or without ""
                         if "NAME"==alllabels[j+1]:
-                            self.indx[replace(values[j], '"', '')]=len(self.NAME)-1
-                            self.indx[replace(values[j], '"', '').upper()]=len(self.NAME)-1
-                            self.indx[replace(values[j], '"', '').lower()]=len(self.NAME)-1
-
+                            self.indx[values[j].replace('"', '')]=len(self.NAME)-1
+                            self.indx[values[j].replace('"', '').upper()]=len(self.NAME)-1
+                            self.indx[values[j].replace('"', '').lower()]=len(self.NAME)-1
         f.close()
         
         for j in range(1,len(alllabels)):
             if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])  ):  
                 exec("self."+alllabels[j]+"= np.array(self."+alllabels[j]+")") 
+
 
 def tfs2pd(file):
         '''
