@@ -125,15 +125,10 @@ def LHCFillsByTime(t1,t2, verbose=False):
     t1 and t2 are pandas datatime, therefore you can use tz-aware expression.
     Tz-naive expressions will be consider UTC-localized.       
 
-    This function returns two pandas dataframes.
-    The first dataframe contains the fills starting in the specified time interval [t1,t2].
-    The second dataframe contains, for those fills, the filling modes.
     The timestamps are time-zone-aware and are in 'UTC'.
-
 
     If, at the moment of the CALS extraction, the fill is not yet dumped, 
     the endTime of the fill is assigned to NaT (Not a Time).
-
 
     ===Example===     
 
@@ -183,9 +178,12 @@ def LHCFillsByTime(t1,t2, verbose=False):
 
     auxDataFrame['startTime']=auxDataFrame['startTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
     auxDataFrame['endTime']=auxDataFrame['endTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
+    
+    aux['mode']='FILL'
+    aux=pd.concat([aux,auxDataFrame])
+    aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
 
-    return aux, auxDataFrame
-
+    return aux
 
 def LHCFillsByNumber(fillList, verbose=False):
     '''
