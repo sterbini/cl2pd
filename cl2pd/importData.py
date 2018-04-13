@@ -134,7 +134,7 @@ def LHCFillsByTime(t1,t2, verbose=False):
 
     t1 = pd.Timestamp('2017-10-01')  # interpreted as tz='UTC'
     t2 = pd.Timestamp('2017-10-02', tz='CET') 
-    summary,details=importData.LHCFillsByTime(t1,t2)
+    df=importData.LHCFillsByTime(t1,t2)
 
     # To tz-convert a specific column from 'UTC' (standard output) to 'CET'. 
     # This practice is not encouraged since 'UTC' time is monotonic along the year 
@@ -189,13 +189,10 @@ def LHCFillsByNumber(fillList, verbose=False):
     '''
     LHCFillsByNumber(fillList, verbose=False)
 
-    This function return two pandas dataframes.
-    The first dataframe contains the fills in the list fillList.
-    The second dataframe contains the fill modes of the list fillList.
     The timestamps are time-zone-aware and by are in 'UTC'.
 
     ===Example===     
-    fillsSummary,fillsModes=importData.LHCFillsByNumber([6400, 5900, 5901])
+    df=importData.LHCFillsByNumber([6400, 5900, 5901])
     '''
     fillsSummary, fillsDetails=pd.DataFrame(),pd.DataFrame()  
 
@@ -250,7 +247,10 @@ def LHCFillsByNumber(fillList, verbose=False):
                                                               convert_dtype=False)
         fillsDetails=fillsDetails.sort_values(['startTime'])
 
-    return fillsSummary, fillsDetails   
+    fillsSummary['mode']='FILL'
+    aux=pd.concat([fillsSummary,fillsDetails])
+    aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
+    return aux   
 
 
 def massiFile2pd(myFileName, myUnzipPath='/tmp'):
