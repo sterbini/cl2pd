@@ -530,5 +530,6 @@ def tfs2pd(file):
         aux1.append(optics)
 
         globalDF=pd.DataFrame([aux1], columns=aux)
-
+        globalDF=globalDF.set_index('FILE_NAME')
+        globalDF.index.name=''
         return globalDF 
