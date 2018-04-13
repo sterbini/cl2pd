@@ -22,6 +22,9 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     The index timestamps of the output are UTC-localized.
     '''
 
+    if listOfVariables==[]:
+        return pd.Dataframe()
+    
     if t1.tz==None:
         t1=t1.tz_localize('UTC')
         if verbose: print('t1 is UTC localized: ' + str(t1))
