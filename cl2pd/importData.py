@@ -23,7 +23,7 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     '''
 
     if len(listOfVariables)==0:
-        return pd.Dataframe()
+        return pd.DataFrame()
     
     if t1.tz==None:
         t1=t1.tz_localize('UTC')
