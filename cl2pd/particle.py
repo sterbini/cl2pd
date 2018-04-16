@@ -25,7 +25,7 @@ def setRelativisticGamma(relativisticGamma, restEnergy_GeV=restEnergyProton_GeV,
         if elementaryCharge==0:
             magneticRigidity_Tm=np.nan
         else:
-            magneticRigidity_Tm=1.E9/particle.speedOfLight_m_s*pc_GeV/elementaryCharge
+            magneticRigidity_Tm=1.E9/speedOfLight_m_s*pc_GeV/elementaryCharge
         return {'totalEnergy_GeV': totalEnergy_GeV,
                 'kinetikEnergy_GeV':kinetikEnergy_GeV,
                 'pc_GeV':pc_GeV,
@@ -58,7 +58,7 @@ def setRelativisticBeta(relativisticBeta, restEnergy_GeV=restEnergyProton_GeV, e
         if elementaryCharge==0:
             magneticRigidity_Tm=np.nan
         else:
-            magneticRigidity_Tm=1.E9/particle.speedOfLight_m_s*pc_GeV/elementaryCharge
+            magneticRigidity_Tm=1.E9/speedOfLight_m_s*pc_GeV/elementaryCharge
         return {'totalEnergy_GeV': totalEnergy_GeV,
                 'kinetikEnergy_GeV':kinetikEnergy_GeV,
                 'pc_GeV':pc_GeV,
