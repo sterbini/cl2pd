@@ -125,7 +125,7 @@ def setPc_GeV(pc_GeV, restEnergy_GeV=restEnergyProton_GeV, elementaryCharge=elem
         if elementaryCharge==0:
             magneticRigidity_Tm=np.nan
         else:
-            magneticRigidity_Tm=1.E9/particle.speedOfLight_m_s*pc_GeV/elementaryCharge
+            magneticRigidity_Tm=1.E9/speedOfLight_m_s*pc_GeV/elementaryCharge
         return {'totalEnergy_GeV': totalEnergy_GeV,
                 'kinetikEnergy_GeV':kinetikEnergy_GeV,
                 'pc_GeV':pc_GeV,
@@ -151,7 +151,7 @@ def setMagneticRigidity_Tm(magneticRigidity_Tm, restEnergy_GeV=restEnergyProton_
         elementaryCharge=-elementaryCharge
 
     if (magneticRigidity_Tm!=0) or ( elementaryCharge!=0):
-        pc_GeV=magneticRigidity_Tm/1.E9*elementaryCharge*particle.speedOfLight_m_s
+        pc_GeV=magneticRigidity_Tm/1.E9*elementaryCharge*speedOfLight_m_s
         relativisticGamma=(1+(pc_GeV/restEnergy_GeV)**2)**.5
         totalEnergy_GeV=restEnergy_GeV*relativisticGamma
         relativisticBeta=np.sqrt(1.-relativisticGamma**-2)
