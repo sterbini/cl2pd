@@ -92,7 +92,7 @@ def setTotalEnergy_GeV(totalEnergy_GeV, restEnergy_GeV=restEnergyProton_GeV, ele
         if elementaryCharge==0:
             magneticRigidity_Tm=np.nan
         else:
-            magneticRigidity_Tm=1.E9/particle.speedOfLight_m_s*pc_GeV/elementaryCharge
+            magneticRigidity_Tm=1.E9/speedOfLight_m_s*pc_GeV/elementaryCharge
         return {'totalEnergy_GeV': totalEnergy_GeV,
                 'kinetikEnergy_GeV':kinetikEnergy_GeV,
                 'pc_GeV':pc_GeV,
