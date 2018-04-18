@@ -294,10 +294,10 @@ def _fillswsinfo(fillsDF, verbose=False):
         if verbose & (row['mode'] == 'FILL'):
             print 'Fill [{}] : {} scans, devices:{}'.format(i,nscantot,devlist)
 
-    fillsDF.loc[:,'WSdev'] = importData.pd.Series(WSDev, index=fillsDF.index)
-    fillsDF.loc[:,'WSscans'] = importData.pd.Series(WSScans,index=fillsDF.index)
-    fillsDF.loc[:,'WSbeam'] = importData.pd.Series(WSBeam,index=fillsDF.index)
-    fillsDF.loc[:,'WSdata'] = importData.pd.Series(WSData,index=fillsDF.index)
+    fillsDF.loc[:,'WSdev'] = pd.Series(WSDev, index=fillsDF.index)
+    fillsDF.loc[:,'WSscans'] = pd.Series(WSScans,index=fillsDF.index)
+    fillsDF.loc[:,'WSbeam'] = pd.Series(WSBeam,index=fillsDF.index)
+    fillsDF.loc[:,'WSdata'] = pd.Series(WSData,index=fillsDF.index)
 
     return fillsDF
 
