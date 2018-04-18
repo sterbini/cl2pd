@@ -258,6 +258,9 @@ def LHCFillsByNumber(fillList, verbose=False):
 def _fillswsinfo(fillsDF, verbose=False):
     '''
     Complete the fillsDF with the WS data info
+    Modifications:
+        (IE) - 18.04.2018 : protect for NaT values in searching for wsdata. Typically the case for the 
+                            last fill in the machine.
     '''
     # --- loop over the rows to get the WS information
 
@@ -266,12 +269,18 @@ def _fillswsinfo(fillsDF, verbose=False):
     WSBeam = []
     WSData = []
     for i,row in fillsDF.iterrows():
-        wsdata = cals.get('LHC.BWS.%NB_BUNCHES%',row['startTime'],row['endTime'])
-
         devlist = []
         devscan = []
         devbscan = [0]*2
         nscantot = 0
+        
+        stime = row['startTime']
+        etime = row['endTime']
+        if (stime is pd.NaT) | (etime is pd.NaT):
+            wsdata = {}
+        else:
+            wsdata = cals.get('LHC.BWS.%NB_BUNCHES%',stime,etime)
+
         for ikey in wsdata.keys():
             nscans = len(wsdata[ikey][0])
             nscantot +=nscans
