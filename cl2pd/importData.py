@@ -255,7 +255,7 @@ def LHCFillsByNumber(fillList, verbose=False):
     aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
     return aux
 
-def _fillwsinfo(fillsDF, verbose=False):
+def _fillswsinfo(fillsDF, verbose=False):
     '''
     Complete the fillsDF with the WS data info
     '''
