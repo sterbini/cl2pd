@@ -1,10 +1,10 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 import os
 # Fundamental contribution by R. De Maria et al.
 import pytimber
 
-# TODO: discuss about the possible problem if the user has already defined a variable named 'cals' 
+# TODO: discuss about the possible problem if the user has already defined a variable named 'cals'
 cals=pytimber.LoggingDB()
 
 def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
@@ -24,7 +24,7 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
 
     if len(listOfVariables)==0:
         return pd.DataFrame()
-    
+
     if t1.tz==None:
         t1=t1.tz_localize('UTC')
         if verbose: print('t1 is UTC localized: ' + str(t1))
@@ -39,7 +39,7 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
         # pyTimber needs CET as internal variable
         t2=t2.astimezone('CET')
 
-        
+
     # Retrieving the variables
     listOfVariableToAdd=list(set(listOfVariables))
     if fundamental=='':
@@ -52,17 +52,17 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     if DATA!={}:
         for i in listOfVariableToAdd:
             if verbose: print('Elaborating variable: '+ i)
-            auxDataFrame=pd.DataFrame()                
+            auxDataFrame=pd.DataFrame()
             auxDataFrame[i]=pd.Series(DATA[i][1].tolist(),pd.to_datetime(DATA[i][0],unit='s'))
             # important function to keep in mind
             myDataFrame=pd.merge(myDataFrame,auxDataFrame, how='outer',left_index=True,right_index=True)
-        
+
     #Time-zone localization
     if len(myDataFrame):
         myDataFrame.index=myDataFrame.index.tz_localize('UTC')
     return myDataFrame
-    
-def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False): 
+
+def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
     '''
     cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False)
 
@@ -76,9 +76,9 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
 
     It can be used to filter fundamentals (especially intended for the injectors).
     It can be used in the verbose mode if the corresponding flag is True.
-    The data extraction can be done splitting it in several n intervals (split=n). 
+    The data extraction can be done splitting it in several n intervals (split=n).
 
-    ===Example===     
+    ===Example===
 
     # you can use different timezone, in this example we use Central European Time (local time at CERN).
     t1 = pd.Timestamp('2017-10-01 17:30', tz='CET')
@@ -89,13 +89,13 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
     '''
     if split<1: split=1
 
-    if split==1: 
+    if split==1:
         myDF=_noSplitcals2pd(listOfVariables, t1, t2, fundamental, verbose)
     else:
         times= pd.to_datetime(np.linspace(t1.value, t2.value, split+1))
         myDF=pd.DataFrame()
         for i in range(len(times)-1):
-            if verbose: print('Time window: '+str(i+1)) 
+            if verbose: print('Time window: '+str(i+1))
             aux=_noSplitcals2pd(listOfVariables,times[i],times[i+1], fundamental=fundamental, verbose=verbose)
             myDF=pd.concat([myDF,aux])
     return myDF.sort_index(axis=1)
@@ -105,7 +105,7 @@ def cycleStamp2pd(variablesList,cycleStampList,verbose=False):
     Return a pandas DataFrame with the specified variables and cyclestamps.
     This can be significantly slow since it accesses CALS for each cyclestamp.
 
-    ===Example===     
+    ===Example===
     startTime=pd.Timestamp('2018-03-27 06:00')
     endTime=pd.Timestamp('2018-03-27 06:10')
     CPSDF=importData.cals2pd(['CPS.LSA:CYCLE'], startTime, endTime, fundamental='%LHC25%')
@@ -119,28 +119,28 @@ def cycleStamp2pd(variablesList,cycleStampList,verbose=False):
             print(i)
         aux=cals2pd(variablesList,i,i)
         myDF=myDF.combine_first(aux)
-    return myDF        
+    return myDF
 
 def LHCFillsByTime(t1,t2, verbose=False):
     '''
-    Retrieve the LHC fills between t1 and t2. 
+    Retrieve the LHC fills between t1 and t2.
 
     t1 and t2 are pandas datatime, therefore you can use tz-aware expression.
-    Tz-naive expressions will be consider UTC-localized.       
+    Tz-naive expressions will be consider UTC-localized.
 
     The timestamps are time-zone-aware and are in 'UTC'.
 
-    If, at the moment of the CALS extraction, the fill is not yet dumped, 
+    If, at the moment of the CALS extraction, the fill is not yet dumped,
     the endTime of the fill is assigned to NaT (Not a Time).
 
-    ===Example===     
+    ===Example===
 
     t1 = pd.Timestamp('2017-10-01')  # interpreted as tz='UTC'
-    t2 = pd.Timestamp('2017-10-02', tz='CET') 
+    t2 = pd.Timestamp('2017-10-02', tz='CET')
     df=importData.LHCFillsByTime(t1,t2)
 
-    # To tz-convert a specific column from 'UTC' (standard output) to 'CET'. 
-    # This practice is not encouraged since 'UTC' time is monotonic along the year 
+    # To tz-convert a specific column from 'UTC' (standard output) to 'CET'.
+    # This practice is not encouraged since 'UTC' time is monotonic along the year
     # (for the moment the leap seconds were always positive).
     summary['startTime']=summary['startTime'].apply(lambda x: x.astimezone('CET'))
     '''
@@ -177,11 +177,11 @@ def LHCFillsByTime(t1,t2, verbose=False):
     aux['duration']=aux['endTime']-aux['startTime']
 
     aux['startTime']=aux['startTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
-    aux['endTime']=aux['endTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False) 
+    aux['endTime']=aux['endTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
 
     auxDataFrame['startTime']=auxDataFrame['startTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
     auxDataFrame['endTime']=auxDataFrame['endTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
-    
+
     aux['mode']='FILL'
     aux=pd.concat([aux,auxDataFrame])
     aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
@@ -194,10 +194,10 @@ def LHCFillsByNumber(fillList, verbose=False):
 
     The timestamps are time-zone-aware and by are in 'UTC'.
 
-    ===Example===     
+    ===Example===
     df=importData.LHCFillsByNumber([6400, 5900, 5901])
     '''
-    fillsSummary, fillsDetails=pd.DataFrame(),pd.DataFrame()  
+    fillsSummary, fillsDetails=pd.DataFrame(),pd.DataFrame()
 
     # We iterate in the fills
     for i in fillList:
@@ -211,8 +211,8 @@ def LHCFillsByNumber(fillList, verbose=False):
         endTimeList=[]
         beamModesList=[]
 
-        # For each fill we parse the DATA dictionary 
-        if DATA!=None: 
+        # For each fill we parse the DATA dictionary
+        if DATA!=None:
 
             for j in DATA['beamModes']:
                 beamModesList.append(j['mode'])
@@ -231,7 +231,7 @@ def LHCFillsByNumber(fillList, verbose=False):
             aux['endTime']=pd.Series(pd.to_datetime(DATA['endTime'],unit='s'), [DATA['fillNumber']])
             aux['duration']=aux['endTime']-aux['startTime']
         else:
-            aux, auxDataFrame=pd.DataFrame(),pd.DataFrame()  
+            aux, auxDataFrame=pd.DataFrame(),pd.DataFrame()
 
         # We concatenate the results
         fillsSummary=pd.concat([aux,fillsSummary])
@@ -240,7 +240,7 @@ def LHCFillsByNumber(fillList, verbose=False):
     # The timestamps are localized and the dataframes are sorted
     if len(fillsSummary):
         fillsSummary['startTime']=fillsSummary['startTime'].apply(lambda x: x.tz_localize('UTC'),\
-                                                                  convert_dtype=False)       
+                                                                  convert_dtype=False)
         fillsSummary['endTime']=fillsSummary['endTime'].apply(lambda x: x.tz_localize('UTC'),\
                                                               convert_dtype=False)
         fillsSummary=fillsSummary.sort_values(['startTime'])
@@ -253,14 +253,129 @@ def LHCFillsByNumber(fillList, verbose=False):
     fillsSummary['mode']='FILL'
     aux=pd.concat([fillsSummary,fillsDetails])
     aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
-    return aux   
+    return aux
 
+def _fillswsinfo(fillsDF, verbose=False):
+    '''
+    Complete the fillsDF with the WS data info
+    Modifications:
+        (IE) - 18.04.2018 : protect for NaT values in searching for wsdata. Typically the case for the 
+                            last fill in the machine.
+    '''
+    # --- loop over the rows to get the WS information
+
+    WSDev = []
+    WSScans = []
+    WSBeam = []
+    WSData = []
+    for i,row in fillsDF.iterrows():
+        devlist = []
+        devscan = []
+        devbscan = [0]*2
+        nscantot = 0
+        
+        stime = row['startTime']
+        etime = row['endTime']
+        if (stime is pd.NaT) | (etime is pd.NaT):
+            wsdata = {}
+        else:
+            wsdata = cals.get('LHC.BWS.%NB_BUNCHES%',stime,etime)
+
+        for ikey in wsdata.keys():
+            nscans = len(wsdata[ikey][0])
+            nscantot +=nscans
+            if nscans > 0 :
+                devnam = ikey[8:16]
+                bb = int(devnam[5:6])
+                pp = devnam[6:7]
+                if verbose:
+                    print 'Wire Sacnner = {} : {} scans found, beam=B{}, plane={}'.format(devnam, nscans, bb, pp)
+                devlist.append(devnam)
+                devscan.append(nscans)
+                if pp == 'H':
+                    devbscan[bb-1] += nscans
+                else:
+                    devbscan[bb-1] += 1000*nscans
+        WSDev.append(devlist)
+        WSScans.append(devscan)
+        WSBeam.append(devbscan)
+        WSData.append(nscantot)
+        if verbose & (row['mode'] == 'FILL'):
+            print 'Fill [{}] : {} scans, devices:{}'.format(i,nscantot,devlist)
+
+    fillsDF.loc[:,'WSdev'] = pd.Series(WSDev, index=fillsDF.index)
+    fillsDF.loc[:,'WSscans'] = pd.Series(WSScans,index=fillsDF.index)
+    fillsDF.loc[:,'WSbeam'] = pd.Series(WSBeam,index=fillsDF.index)
+    fillsDF.loc[:,'WSdata'] = pd.Series(WSData,index=fillsDF.index)
+
+    return fillsDF
+
+def LHCFillsWSInfoByTime(t1, t2, verbose=False):
+    '''
+    Retrieve LHC WS data for the fills in a time window defined by t1 and t2.
+
+    This function extends the DF of LHCFillsByTime defined in the cl2pd package
+
+    the fillDF is extended with the columns : 'WSdev','WSscans','WSbeam','WSdata
+        WSdev   : the list of devices with WS data
+        WSscans : # of scans per device
+        WSbeam  : # scans per beam [0]=B1, [1]=B2, and the number is Hscans*10000 + Vscans
+        WSdata  : total number of scans for all devices, beams and planes
+    '''
+
+    if t1.tz==None:
+        t1=t1.tz_localize('UTC')
+        if verbose: print('t1 is UTC localized: ' + str(t1))
+
+    # pyTimber needs CET as internal variable
+    t1=t1.astimezone('CET')
+
+    if not isinstance(t2, str):
+        if t2.tz==None:
+            t2=t2.tz_localize('UTC')
+            if verbose: print('t2 is UTC localized: '+ str(t2))
+        # pyTimber needs CET as internal variable
+        t2=t2.astimezone('CET')
+
+
+    # -- get the DF with the list of fills in the period
+
+    fillsDF = LHCFillsByTime(t1=t1,t2=t2,verbose=verbose)
+    if fillsDF.empty:
+        if verbose: print 'No Fills found for the selected time window - return None'
+        return None
+
+    fillsDF = _fillswsinfo(fillsDF, verbose)
+
+    return fillsDF
+
+def LHCFillsWSInfoByNumber(flist, verbose=False):
+    '''
+    Retrieve LHC WS data for the fills in a list.
+
+    This function extends the DF of LHCFillsByNumber by adding the collumns:
+        WSdev   : the list of devices with WS data
+        WSscans : # of scans per device
+        WSbeam  : # scans per beam [0]=B1, [1]=B2, and the number is Hscans*10000 + Vscans
+        WSdata  : total number of scans for all devices, beams and planes
+    '''
+
+    # -- get the DF with the list of fills in the period
+
+    fillsDF = LHCFillsByNumber(flist,verbose=verbose)
+    if fillsDF.empty:
+        if verbose: print 'No Fills found! Verify supplied list is not empty - return None'
+        return None
+
+    fillsDF = _fillswsinfo(fillsDF, verbose)
+
+    return fillsDF
 
 def massiFile2pd(myFileName, myUnzipPath='/tmp'):
     '''
     Transform a Massi file in form of pandas dataframe.
 
-    ===Example===     
+    ===Example===
     ATLAS=importData.massiFile2pd('/eos/user/s/sterbini/MD_ANALYSIS/2017/LHC/MD2201/ATLAS_6195.tgz')
 
     Massi files can be found at /afs/cern.ch/user/l/lpc/w0/
@@ -323,7 +438,7 @@ def calsCSV2pd(myFile):
             if lines[i][0:8]=='VARIABLE':
                 variableName=lines[i].split(': ')[1][0:-1]
                 startLinesList.append(i)
-                variableNameList.append(variableName)            
+                variableNameList.append(variableName)
 
             if lines[i][0:9]=='Timestamp':
                 variableName=lines[i].split(',')[1][0:-1]
@@ -347,29 +462,29 @@ def calsCSV2pd(myFile):
             j=startLinesList[i]+3
             myTime=[]
             myArray=[]
-            while j<(startLinesList[i+1]):    
+            while j<(startLinesList[i+1]):
                 myReading=lines[j].split(',')
                 myTime.append(myReading[0])
                 myArray.append(np.double(myReading[1:]))
                 j=j+1
             df=pd.DataFrame({'Array Values':myArray,'Timestamp (UTC_TIME)':myTime})
             df=df.set_index('Timestamp (UTC_TIME)')
-            df=df.rename(index=str, columns={'Array Values': variableNameList[i] })     
+            df=df.rename(index=str, columns={'Array Values': variableNameList[i] })
             df.index=pd.DatetimeIndex(df.index)
         # I merge to maintain the index unique
-        aux=pd.merge(aux,df, left_index=True, 
-                         right_index=True, 
+        aux=pd.merge(aux,df, left_index=True,
+                         right_index=True,
                          how='outer')
     aux.index=aux.index.tz_localize('UTC')
     aux=aux.sort_index()
     del aux.index.name
-    return aux 
+    return aux
 
 def mat2dict(myfile):
     '''
-    Import a matlab file in a python structure 
+    Import a matlab file in a python structure
 
-    ===Example===     
+    ===Example===
     aux=importData.mat2dict('/eos/user/s/sterbini/MD_ANALYSIS/2016/MD1780_80b/2016.10.26.22.23.42.135.mat')
     '''
     import scipy.io
@@ -380,7 +495,7 @@ def mat2pd(variablesList,filesList, verbose=False, matlabFullInfo=False):
     '''
     Return a pandas DataFrame given a variable list and a file list.
 
-    ===Example=== 
+    ===Example===
     importData.mat2pd(['CPS_BLM.Acquisition.value.lastLosses'],\
     ['/eos/user/s/sterbini/MD_ANALYSIS/2016/MD1780_80b/2016.10.26.22.23.42.135.mat',\
     '/eos/user/s/sterbini/MD_ANALYSIS/2016/MD1780_80b/2016.10.26.22.23.06.147.mat'])
@@ -411,7 +526,7 @@ def mat2pd(variablesList,filesList, verbose=False, matlabFullInfo=False):
     if matlabFullInfo:
         myDataFrame['matlabFullInfo']=pd.Series(matlabObject,cycleStampList)
     for j in variablesList:
-        exec('myDataFrame[\'' + j + '\']=pd.Series(' +j.replace('.','_')+ ',cycleStampList)')   
+        exec('myDataFrame[\'' + j + '\']=pd.Series(' +j.replace('.','_')+ ',cycleStampList)')
     return myDataFrame.sort_index(axis=1).sort_index(axis=0)
 
 class _TFS:
@@ -419,8 +534,8 @@ class _TFS:
        TFS parameters from MADX TFS output.
        The approach used is mainly inherithed from the class TWISS suggested by H. Bartosik et al.
     '''
-           
-    def __init__(self, filename): 
+
+    def __init__(self, filename):
         self.indx={}
         self.keys=[]
         alllabels=[]
@@ -428,9 +543,9 @@ class _TFS:
         #    f=gzip.open(filename, 'rb')
         #else:
         f=open(filename, 'r')
-            
+
         for line in f:
-            if ("@ " not in line and "@" in line): 
+            if ("@ " not in line and "@" in line):
                 line = replace(line, "@" , "@ ")
             if ("@ " in line and "%" in line and "s" not in line.split()[2]) :
                 label=line.split()[1]
@@ -452,16 +567,16 @@ class _TFS:
                     for j in range(1,len(alllabels)):
                         exec("self."+alllabels[j]+"= []")
                         self.keys.append(alllabels[j])
-                            
+
             if ("$ " in line or "$\t" in line) :
-                alltypes=line.split()                
+                alltypes=line.split()
 
             if ("@" not in line and "*" not in line and "$" not in line) :
-                values=line.split()   
+                values=line.split()
                 for j in range(0,len(values)):
-                    if ("%hd" in alltypes[j+1]):                      
-                        exec("self."+alllabels[j+1]+".append("+str(int(values[j]))+")")                 
-                    if ("%le" in alltypes[j+1]):                      
+                    if ("%hd" in alltypes[j+1]):
+                        exec("self."+alllabels[j+1]+".append("+str(int(values[j]))+")")
+                    if ("%le" in alltypes[j+1]):
                         exec("self."+alllabels[j+1]+".append("+str(float(values[j]))+")")
                     if ("s" in alltypes[j+1]):
                         try:
@@ -473,17 +588,17 @@ class _TFS:
                             self.indx[values[j].replace('"', '').upper()]=len(self.NAME)-1
                             self.indx[values[j].replace('"', '').lower()]=len(self.NAME)-1
         f.close()
-        
+
         for j in range(1,len(alllabels)):
-            if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])  ):  
-                exec("self."+alllabels[j]+"= np.array(self."+alllabels[j]+")") 
+            if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])  ):
+                exec("self."+alllabels[j]+"= np.array(self."+alllabels[j]+")")
 
 
 def tfs2pd(file):
         '''
         Import a MADX TFS file in a pandas dataframe.
-        
-        ===Example=== 
+
+        ===Example===
         aux=TFS2pd('/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey')
         '''
         a=_TFS(file);
@@ -510,7 +625,7 @@ def tfs2pd(file):
             else:
                 myColumns.append(i)
                 myList.append(myContainer)
-                
+
         optics=pd.DataFrame(np.transpose(myList), index=a.S,columns=myColumns)
 
         for i in optics.columns:
@@ -535,4 +650,4 @@ def tfs2pd(file):
         globalDF=pd.DataFrame([aux1], columns=aux)
         globalDF=globalDF.set_index('FILE_NAME')
         globalDF.index.name=''
-        return globalDF 
+        return globalDF
