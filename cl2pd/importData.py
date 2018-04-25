@@ -527,14 +527,14 @@ class _TFS:
                 exec("self."+alllabels[j]+"= np.array(self."+alllabels[j]+")") 
 
 
-def tfs2pd(file):
+def tfs2pd(myFile):
         '''
         Import a MADX TFS file in a pandas dataframe.
         
         ===Example=== 
         aux=TFS2pd('/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey')
         '''
-        a=_TFS(file);
+        a=_TFS(myFile);
         aux=[]
         aux1=[]
 
@@ -575,7 +575,7 @@ def tfs2pd(file):
                     optics[i]=optics[i].apply(np.double)
 
         aux.append('FILE_NAME')
-        aux1.append(os.path.abspath(file))
+        aux1.append(os.path.abspath(myFile))
 
         aux.append('TABLE')
         aux1.append(optics)
