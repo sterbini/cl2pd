@@ -119,33 +119,40 @@ def cycleStamp2pd(variablesList,cycleStampList,verbose=False):
             print(i)
         aux=cals2pd(variablesList,i,i)
         myDF=myDF.combine_first(aux)
-    return myDF        
+    return myDF 
+
+def _UTClocalizeMe(x):
+    '''
+    Return the tz-aware datetime. In case of error returns x.
+    '''
+    try:
+        return x.tz_localize('UTC')
+    except:
+         return x # in case NaT or None
 
 def LHCFillsByTime(t1,t2, verbose=False):
     '''
-    Retrieve the LHC fills between t1 and t2. 
+    Retrieve the LHC fills between t1 and t2.
 
     t1 and t2 are pandas datatime, therefore you can use tz-aware expression.
-    Tz-naive expressions will be consider UTC-localized.       
+    Tz-naive expressions will be consider UTC-localized.
 
     The timestamps are time-zone-aware and are in 'UTC'.
 
-    If, at the moment of the CALS extraction, the fill is not yet dumped, 
+    If, at the moment of the CALS extraction, the fill is not yet dumped,
     the endTime of the fill is assigned to NaT (Not a Time).
 
-    ===Example===     
+    ===Example===
 
     t1 = pd.Timestamp('2017-10-01')  # interpreted as tz='UTC'
-    t2 = pd.Timestamp('2017-10-02', tz='CET') 
+    t2 = pd.Timestamp('2017-10-02', tz='CET')
     df=importData.LHCFillsByTime(t1,t2)
 
-    # To tz-convert a specific column from 'UTC' (standard output) to 'CET'. 
-    # This practice is not encouraged since 'UTC' time is monotonic along the year 
+    # To tz-convert a specific column from 'UTC' (standard output) to 'CET'.
+    # This practice is not encouraged since 'UTC' time is monotonic along the year
     # (for the moment the leap seconds were always positive).
     summary['startTime']=summary['startTime'].apply(lambda x: x.astimezone('CET'))
     '''
-
-    #TODO: test for the fill that is still running
 
     if t1.tz==None: t1.tz_localize('UTC')
     else: t1=t1.astimezone('CET')
@@ -176,17 +183,35 @@ def LHCFillsByTime(t1,t2, verbose=False):
     aux['endTime']=pd.Series(pd.to_datetime(ET,unit='s'), FN)
     aux['duration']=aux['endTime']-aux['startTime']
 
-    aux['startTime']=aux['startTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
-    aux['endTime']=aux['endTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False) 
+ 
+    aux['startTime']=aux['startTime'].apply(_UTClocalizeMe)
+    aux['endTime']=aux['endTime'].apply(_UTClocalizeMe)
 
-    auxDataFrame['startTime']=auxDataFrame['startTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
-    auxDataFrame['endTime']=auxDataFrame['endTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
-    
+    auxDataFrame['startTime']=auxDataFrame['startTime'].apply(_UTClocalizeMe)
+    auxDataFrame['endTime']=auxDataFrame['endTime'].apply(_UTClocalizeMe)
     aux['mode']='FILL'
-    aux=pd.concat([aux,auxDataFrame])
-    aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
-
-    return aux
+    fillsSummary=aux;
+    fillsDetails=auxDataFrame;
+    out=pd.DataFrame()
+    if len(fillsSummary)>0:
+        if (len(fillsSummary)==1) & (str(fillsSummary.iloc[0]['duration'])=='NaT'):
+            # If there is only the online FILL (so not yet completed)
+            # TODO: very cumbersome casting (first to string, then concatenation, then to timestamp)
+            # I am no satisfied [GS]
+            if verbose: print('Online FILL...')
+            fillsSummary['endTime']='NaT'
+            fillsSummary['duration']='NaT'
+            fillsDetails['endTime']=fillsDetails['endTime'].astype(str)
+            fillsDetails['duration']=fillsDetails['duration'].astype(str)
+            out=pd.concat([fillsDetails,fillsSummary])
+            out=out.sort_values('startTime')[['mode','startTime','endTime','duration']]
+            out['endTime']=out['endTime'].apply(pd.Timestamp)
+            out['duration']=out['endTime']-out['startTime']
+        else:
+            out=pd.concat([fillsDetails,fillsSummary])
+            out=out.sort_values('startTime')[['mode','startTime','endTime','duration']]    
+    
+    return out
 
 def LHCFillsByNumber(fillList, verbose=False):
     '''
@@ -194,10 +219,13 @@ def LHCFillsByNumber(fillList, verbose=False):
 
     The timestamps are time-zone-aware and by are in 'UTC'.
 
-    ===Example===     
+    ===Example===
     df=importData.LHCFillsByNumber([6400, 5900, 5901])
     '''
-    fillsSummary, fillsDetails=pd.DataFrame(),pd.DataFrame()  
+    fillsSummary, fillsDetails, aux=pd.DataFrame(),pd.DataFrame(),pd.DataFrame()
+    
+    # we dilter with unique
+    fillList=np.unique(fillList)
 
     # We iterate in the fills
     for i in fillList:
@@ -211,8 +239,8 @@ def LHCFillsByNumber(fillList, verbose=False):
         endTimeList=[]
         beamModesList=[]
 
-        # For each fill we parse the DATA dictionary 
-        if DATA!=None: 
+        # For each fill we parse the DATA dictionary
+        if DATA!=None:
 
             for j in DATA['beamModes']:
                 beamModesList.append(j['mode'])
@@ -228,10 +256,16 @@ def LHCFillsByNumber(fillList, verbose=False):
 
             aux=pd.DataFrame()
             aux['startTime']=pd.Series(pd.to_datetime(DATA['startTime'],unit='s'), [DATA['fillNumber']])
-            aux['endTime']=pd.Series(pd.to_datetime(DATA['endTime'],unit='s'), [DATA['fillNumber']])
-            aux['duration']=aux['endTime']-aux['startTime']
+            if DATA['endTime']==None:
+                aux['endTime']=pd.Series(pd.to_datetime(endTimeList[-1],unit='s'), [DATA['fillNumber']])
+            else:
+                aux['endTime']=pd.Series(pd.to_datetime(DATA['endTime'],unit='s'), [DATA['fillNumber']])
+            try: 
+                aux['duration']=aux['endTime']-aux['startTime']
+            except:
+                aux['duration']=pd.to_datetime(endTimeList[-1],unit='s')
         else:
-            aux, auxDataFrame=pd.DataFrame(),pd.DataFrame()  
+            aux, auxDataFrame=pd.DataFrame(),pd.DataFrame()
 
         # We concatenate the results
         fillsSummary=pd.concat([aux,fillsSummary])
@@ -239,21 +273,35 @@ def LHCFillsByNumber(fillList, verbose=False):
 
     # The timestamps are localized and the dataframes are sorted
     if len(fillsSummary):
-        fillsSummary['startTime']=fillsSummary['startTime'].apply(lambda x: x.tz_localize('UTC'),\
-                                                                  convert_dtype=False)       
-        fillsSummary['endTime']=fillsSummary['endTime'].apply(lambda x: x.tz_localize('UTC'),\
-                                                              convert_dtype=False)
+        fillsSummary['startTime']=fillsSummary['startTime'].apply(_UTClocalizeMe)
+        fillsSummary['endTime']=fillsSummary['endTime'].apply(_UTClocalizeMe)
         fillsSummary=fillsSummary.sort_values(['startTime'])
 
-        fillsDetails['startTime']=fillsDetails['startTime'].apply(lambda x: x.tz_localize('UTC'), convert_dtype=False)
-        fillsDetails['endTime']=fillsDetails['endTime'].apply(lambda x: x.tz_localize('UTC'),\
-                                                              convert_dtype=False)
+        fillsDetails['startTime']=fillsDetails['startTime'].apply(_UTClocalizeMe)
+        fillsDetails['endTime']=fillsDetails['endTime'].apply(_UTClocalizeMe)
+
         fillsDetails=fillsDetails.sort_values(['startTime'])
 
     fillsSummary['mode']='FILL'
-    aux=pd.concat([fillsSummary,fillsDetails])
-    aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
-    return aux   
+    
+    if len(fillsSummary)>0:
+        if (len(fillsSummary)==1) & (fillsSummary.iloc[0]['duration']==None):
+            # If there is only the online FILL (so not yet completed)
+            # TODO: very cumbersome casting (first to string, then concatenation, then to timestamp)
+            # I am no satisfied [GS]
+            if verbose: print('Online FILL...')
+            fillsSummary['endTime']='NaT'
+            fillsSummary['duration']='NaT'
+            fillsDetails['endTime']=fillsDetails['endTime'].astype(str)
+            fillsDetails['duration']=fillsDetails['duration'].astype(str)
+            aux=pd.concat([fillsDetails,fillsSummary])
+            aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
+            aux['endTime']=aux['endTime'].apply(pd.Timestamp)
+            aux['duration']=aux['endTime']-aux['startTime']
+        else:
+            aux=pd.concat([fillsDetails,fillsSummary])
+            aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]    
+    return aux
 
 
 def massiFile2pd(myFileName, myUnzipPath='/tmp'):
