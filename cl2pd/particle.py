@@ -5,6 +5,8 @@ import numpy as np
 restEnergyProton_GeV=0.93827231
 elementaryChargeProton=1.
 speedOfLight_m_s=299792458. 
+mu0_H_m=4.*np.pi*1e-7
+epsilon0_F_m= 8.854187817e-12
 
 def setRelativisticGamma(relativisticGamma, restEnergy_GeV=restEnergyProton_GeV, elementaryCharge=elementaryChargeProton):
     """See signature."""
