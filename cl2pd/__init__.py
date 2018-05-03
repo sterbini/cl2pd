@@ -1,3 +1,8 @@
+'''
+A simple package to convert CERN Logging information (using pytimber/CALS, mat-files, massi-files, TFS-files) 
+into a pandas dataframe.
+'''
+
 #import pandas as pd 
 #import numpy as np
 # Fundamental contribution by R. De Maria et al.
