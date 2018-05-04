@@ -1,15 +1,19 @@
 '''
 A simple package to convert CERN Logging information (using pytimber/CALS, mat-files, massi-files, TFS-files) 
 into a pandas dataframe.
+
+import cl2pd # do "pip install --user git+https://github.com/sterbini/cl2pd.git" to install
+from cl2pd import importData
+from cl2pd import plotFunctions
+import matplotlib.pyplot as plt
+pd=importData.pd     # is the pandas package
+np=importData.np     # is the numpy package
+cals=importData.cals # pytimber log class
+get_ipython().magic('matplotlib inline')
+%config InlineBackend.figure_format = 'retina' # retina display
+# mySource='string with full notebook address used to comment plots'
 '''
 
-#import pandas as pd 
-#import numpy as np
-# Fundamental contribution by R. De Maria et al.
-#import pytimber
-
-# TODO: discuss about the possible problem if the user has already defined a variable named 'cals' 
-#cals=pytimber.LoggingDB()
 
 class dotdict(dict):
     '''
@@ -57,32 +61,4 @@ class dotdict(dict):
         self.update(state)
         self.__dict__ = self
         
-def suggestedHeader():        
-    '''
-    import cl2pd # do "pip install --user git+https://github.com/sterbini/cl2pd.git" to install
-    from cl2pd import importData
-    from cl2pd import plotFunctions
-    import matplotlib.pyplot as plt
-    pd=importData.pd     # is the pandas package
-    np=importData.np     # is the numpy package
-    cals=importData.cals # pytimber log class
-
-    get_ipython().magic('matplotlib inline')
-    %config InlineBackend.figure_format = 'retina' # retina display
-    # mySource='string with full notebook address used to comment plots' 
-    '''
-    myString='''
-    import cl2pd # do "pip install --user git+https://github.com/sterbini/cl2pd.git" to install
-    from cl2pd import importData
-    from cl2pd import plotFunctions
-    import matplotlib.pyplot as plt
-    pd=importData.pd     # is the pandas package
-    np=importData.np     # is the numpy package
-    cals=importData.cals # pytimber log class
-
-    get_ipython().magic('matplotlib inline')
-    %config InlineBackend.figure_format = 'retina' # retina display
-    # mySource='string with full notebook address used to comment plots' 
-    '''
-    print(myString)
     
