@@ -7,8 +7,8 @@ import cl2pd # do "pip install --user git+https://github.com/sterbini/cl2pd.git"
 from cl2pd import importData
 from cl2pd import plotFunctions
 from cl2pd import dotdict
-dotdict
 
+dotdict=dotdict.dotdict
 pd=importData.pd     # is the pandas package
 np=importData.np     # is the numpy package
 cals=importData.cals # pytimber log class
