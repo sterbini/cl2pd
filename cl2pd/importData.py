@@ -7,6 +7,29 @@ import pytimber
 # TODO: discuss about the possible problem if the user has already defined a variable named 'cals' 
 cals=pytimber.LoggingDB()
 
+def _smartList(myList):
+    '''
+    Return a list with no duplicate and resolve the '%' search pattern.
+    
+    ===Example===
+    _smartList(['CPS.LSA:%','TFB-DSPU-%-NEW:OPERATION:BLOWUPENABLE'])
+    _smartList('CPS.LSA:%')
+
+    '''
+    if isinstance(myList,str):
+        if '%' in myList:
+            return cals.search(myList)
+        else:
+            return [myList]
+    
+    newList=[]
+    for i in myList:
+        if '%' in i:
+            newList=newList+cals.search(i)
+        else:
+            newList=newList+[i]
+    return list(np.unique(newList))
+
 def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     '''
     It is a cals2pd without splitting feature.
@@ -24,6 +47,8 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
 
     if len(listOfVariables)==0:
         return pd.DataFrame()
+    
+    listOfVariables=_smartList(listOfVariables)
     
     if t1.tz==None:
         t1=t1.tz_localize('UTC')
@@ -83,7 +108,7 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
     # you can use different timezone, in this example we use Central European Time (local time at CERN).
     t1 = pd.Timestamp('2017-10-01 17:30', tz='CET')
     t2 = pd.Timestamp('2017-10-01 17:31', tz='CET')
-    raw_data = importData.cals2pd(variables,t1,t2)
+    raw_data = importData.cals2pd(['LHC.BCTDC.A6R4.B%:BEAM_INTENSITY','CPS.%:USER'],t1,t2)
     # By default the index timezone is UTC but, even if not encouraged, you can chance the index time zone.
     raw_data.index=raw_data.index.tz_convert('CET')
     '''
