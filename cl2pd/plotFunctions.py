@@ -63,4 +63,4 @@ def setShadedRegion(ax,color='g' ,xLimit=[0,1],alpha=.1):
     aux=ax.get_ylim()
     plt.gca().fill_between(xLimit, 
                        [aux[0],aux[0]],  [aux[1],aux[1]],color=color, alpha=alpha)
-
+    ax.set_ylim(aux)
