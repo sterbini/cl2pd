@@ -552,7 +552,7 @@ class _TFS:
                 exec("self."+alllabels[j]+"= np.array(self."+alllabels[j]+")") 
 
 
-def tfs2pd(myFile):
+def _tfs2pd(myFile):
         '''
         Import a MADX TFS file in a pandas dataframe.
         
@@ -609,3 +609,19 @@ def tfs2pd(myFile):
         globalDF=globalDF.set_index('FILE_NAME')
         globalDF.index.name=''
         return globalDF 
+    
+def tfs2pd(myList):
+    '''
+        Import a MADX TFS file in a pandas dataframe.
+        
+        ===Example=== 
+        aux=tfs2pd(['/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey',
+        '/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.twiss'])
+    '''
+    if isinstance(myList, list):
+        aux=[]
+        for i in np.unique(myList):
+            aux.append(_tfs2pd(i))
+        return pd.concat(aux)
+    else:
+        return tfs2pd(myList)
