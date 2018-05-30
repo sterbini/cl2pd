@@ -624,4 +624,4 @@ def tfs2pd(myList):
             aux.append(_tfs2pd(i))
         return pd.concat(aux)
     else:
-        return tfs2pd(myList)
+        return _tfs2pd(myList)
