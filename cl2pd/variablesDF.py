@@ -17,6 +17,14 @@ LHC=pd.DataFrame([['LHC.BOFSU:OFC_ENERGY','Energy','NUMERIC',True],
               ['LHC.BQBBQ.CONTINUOUS.B2:TUNE_H', 'Tune','NUMERIC', False],
               ['LHC.BQBBQ.CONTINUOUS_HS.B1:TUNE_H', 'Tune','NUMERIC' , False,'Most sensitive tune'],
               ['LHC.BQBBQ.CONTINUOUS_HS.B2:TUNE_H', 'Tune','NUMERIC', False,'Most sensitive tune'],
+                  
+              ['LHC.BCTFR.A6R4.B1:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Main FBCT B1'],
+              ['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Main FBCT B2'],
+              ['LHC.BCTFR.B6R4.B1:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Spare FBCT B1'],
+              ['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Spare FBCT B2'],
+                  
+              ['CMS:BUNCH_LUMI_INST', 'Luminosity', 'NUMERIC', False, 'CMS bbb luminosity'],
+              ['ATLAS:BUNCH_LUMI_INST', 'Luminosity', 'NUMERIC', False, 'ATLAS bbb luminosity'],
                     
               ['RPMC.UL14.RBBCW.L1B2:I_MEAS','Wire L1 B2','NUMERIC', True,'Wire current'],
               ['RPMC.UL16.RBBCW.R1B2:I_MEAS','Wire R1 B2','NUMERIC', True,'Wire current'],
