@@ -23,6 +23,11 @@ LHC=pd.DataFrame([['LHC.BOFSU:OFC_ENERGY','Energy','NUMERIC',True],
               ['LHC.BCTFR.B6R4.B1:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Spare FBCT B1'],
               ['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Spare FBCT B2'],
                   
+              ['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN', 'Filling Pattern', 'NUMERIC', False, 'Main FBCT B1'],
+              ['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN', 'Filling Pattern', 'NUMERIC', False, 'Main FBCT B2'],
+              ['LHC.BCTFR.B6R4.B1:BUNCH_FILL_PATTERN', 'Filling Pattern', 'NUMERIC', False, 'Spare FBCT B1'],
+              ['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN', 'Filling Pattern', 'NUMERIC', False, 'Spare FBCT B2'],
+                  
               ['CMS:BUNCH_LUMI_INST', 'Luminosity', 'NUMERIC', False, 'CMS bbb luminosity'],
               ['ATLAS:BUNCH_LUMI_INST', 'Luminosity', 'NUMERIC', False, 'ATLAS bbb luminosity'],
                     
