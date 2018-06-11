@@ -625,3 +625,63 @@ def tfs2pd(myList):
         return pd.concat(aux)
     else:
         return _tfs2pd(myList)
+    
+def LHCcals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False):
+    '''
+    LHCcals2pd(listOfVariables, fillList, beamModeList='FILL', split=1, verbose=False)
+
+    Return the listOfVariables in the fill of the fillList for a given list of beamModeList. 
+    
+    It can be used in the verbose mode if the corresponding flag is True.
+    The data extraction can be done splitting it in several n intervals (split=n). 
+
+    ===Example===     
+    LHCcals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666],['RAMP','FLATTOP'])
+    '''
+    if len(listOfVariables)==0:
+        return pd.DataFrame()
+    
+    fillList=np.unique(fillList)
+    beamModeList=np.unique(beamModeList)
+        
+    listDF=[]
+
+    for fill in fillList: 
+        if verbose: print('Fill: '+str(fill))
+        fillDF=LHCFillsByNumber(fill)
+        for BM in beamModeList:
+            aux=fillDF[fillDF['mode']==BM]
+            if verbose: print('Beam mode: '+BM)
+
+            for index,row in aux.iterrows():
+                t1=row.startTime
+                t2=row.endTime
+                if verbose: print('Start time: '+str(t1))
+                if verbose: print('End time: '+str(t2))
+
+
+                listDF.append(importData.cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose))
+    if listDF==[]:
+        return pd.DataFrame()
+    else:
+        return pd.concat(listDF).sort_index()
+
+def LHCinstant(t1,timeSpan_days=1):
+    '''
+    Return the fill information at the instant t1.
+    timeSpan_days is the argument needed to start the search in the period [t1-timeSpan_days,t1].
+    If the fill active in t1 has to start in the interval [t1-timeSpan_days,t1]. In most of the cases timeSpan_days=1
+    is enough.
+    
+    ===Example===   
+    t1 = pd.Timestamp('2018-05-22 02:10:15', tz='CET')
+    LHCinstant(t1)
+    '''
+    if t1.tz==None: t1.tz_localize('UTC')
+    else: t1=t1.astimezone('UTC')
+    aux=LHCFillsByTime(t1-pd.DateOffset(timeSpan_days) ,t1)
+    aux=aux[aux['mode']!='FILL']
+    aux['test']=aux.apply(lambda x: x['startTime']<=t1<=x['endTime'] , axis=1)
+    aux= aux[aux['test']]
+    del aux['test']
+    return aux
