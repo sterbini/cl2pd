@@ -557,7 +557,7 @@ def _tfs2pd(myFile):
         Import a MADX TFS file in a pandas dataframe.
         
         ===Example=== 
-        aux=TFS2pd('/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey')
+        aux=importData.TFS2pd('/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey')
         '''
         a=_TFS(myFile);
         aux=[]
@@ -615,7 +615,7 @@ def tfs2pd(myList):
         Import a MADX TFS file in a pandas dataframe.
         
         ===Example=== 
-        aux=tfs2pd(['/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey',
+        aux=importData.tfs2pd(['/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey',
         '/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.twiss'])
     '''
     if isinstance(myList, list):
@@ -636,7 +636,7 @@ def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=
     The data extraction can be done splitting it in several n intervals (split=n). 
 
     ===Example===     
-    LHCcals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666],['RAMP','FLATTOP'])
+    importData.LHCCals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666],['RAMP','FLATTOP'])
     '''
     if len(listOfVariables)==0:
         return pd.DataFrame()
@@ -675,7 +675,7 @@ def LHCInstant(t1,timeSpan_days=1):
     
     ===Example===   
     t1 = pd.Timestamp('2018-05-22 02:10:15', tz='CET')
-    LHCinstant(t1)
+    importData.LHCInstant(t1)
     '''
     if t1.tz==None: t1.tz_localize('UTC')
     else: t1=t1.astimezone('UTC')
