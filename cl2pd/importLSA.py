@@ -14,9 +14,9 @@ import pjlsa
 pd=importData.pd     # is the pandas package
 lsa = pjlsa.LSAClient()
 
-def LHCLsa2pd(parameterList,beamprocessList,t1,t2):
+def LHCLsa2pd(parameterList, beamprocessList, t1, t2, verbose=False):
     '''
-    LHCLsa2pd(parameterList,beamprocessList,t1,t2)
+    LHCLsa2pd(parameterList, beamprocessList, t1, t2, verbose=False)
     Import the parameters in parameterList for the beam processes in beamprocessList in the period [t1,t2] from LSA for LHC.
     ===EXAMPLE===
     from cl2pd import importLSA
