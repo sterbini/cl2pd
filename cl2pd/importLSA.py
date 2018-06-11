@@ -1,3 +1,12 @@
+'''
+Import data from LSA (using https://github.com/rdemaria/pjlsa) and transforming it in pandas dataframes.
+===EXAMPLE===
+from cl2pd import importLSA
+pd=importLSA.pd
+t1=pd.Timestamp('2017-11-22 13:40',tz='CET')
+t2=pd.Timestamp('2017-11-22 13:42',tz='CET')
+importLSA.LHCLsa2pd(['LHCBEAM1/QH_TRIM','LHCBEAM1/QV_TRIM'],['RAMP-6.5TeV-HIGH-BETA-V2-2017_V1@0_[START]'],t1,t2)            
+'''
 
 import importData
 import pjlsa
@@ -5,7 +14,17 @@ import pjlsa
 pd=importData.pd     # is the pandas package
 lsa = pjlsa.LSAClient()
 
-def LHClsa2pd(parameterList,beamprocessList,t1,t2):
+def LHCLsa2pd(parameterList,beamprocessList,t1,t2):
+    '''
+    LHCLsa2pd(parameterList,beamprocessList,t1,t2)
+    Import the parameters in parameterList for the beam processes in beamprocessList in the period [t1,t2] from LSA for LHC.
+    ===EXAMPLE===
+    from cl2pd import importLSA
+    pd=importLSA.pd
+    t1=pd.Timestamp('2017-11-22 13:40',tz='CET')
+    t2=pd.Timestamp('2017-11-22 13:42',tz='CET')
+    importLSA.LHCLsa2pd(['LHCBEAM1/QH_TRIM','LHCBEAM1/QV_TRIM'],['RAMP-6.5TeV-HIGH-BETA-V2-2017_V1@0_[START]'],t1,t2)            
+    '''
     if t1.tz==None:
         t1=t1.tz_localize('UTC')
         if verbose: print('t1 is UTC localized: ' + str(t1))
