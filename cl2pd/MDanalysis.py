@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def raw2bbbDF_filter(rawInput,fill=np.arange(3564)):
+def raw2bbb(rawInput,fill=np.arange(3564)):
     '''
     Input: 
     rawInput is a pandas Series containing vectors (FBCT, lumi, etc...)
