@@ -18,6 +18,11 @@ LHC=pd.DataFrame([['LHC.BOFSU:OFC_ENERGY','Energy','NUMERIC',True,'Beam energy']
               ['LHC.BQBBQ.CONTINUOUS_HS.B1:TUNE_H', 'Tune','NUMERIC' , False,'Most sensitive tune B1 H'],
               ['LHC.BQBBQ.CONTINUOUS_HS.B2:TUNE_H', 'Tune','NUMERIC', False,'Most sensitive tune B2 H'],
                   
+              ['LHC.BQBBQ.CONTINUOUS.B1:FFT_DATA_H', 'Tune FFT','NUMERIC' , False, 'Tune FFT H B1'],
+              ['LHC.BQBBQ.CONTINUOUS.B1:FFT_DATA_V', 'Tune FFT','NUMERIC', False, 'Tune FFT V B1'],
+              ['LHC.BQBBQ.CONTINUOUS.B2:FFT_DATA_H', 'Tune FFT','NUMERIC' , False,'Tune FFT H B2'],
+              ['LHC.BQBBQ.CONTINUOUS.B2:FFT_DATA_V', 'Tune FFT','NUMERIC', False,'Tune FFT V B2'],
+                  
               ['LHC.BCTFR.A6R4.B1:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Main FBCT B1'],
               ['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Main FBCT B2'],
               ['LHC.BCTFR.B6R4.B1:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Spare FBCT B1'],
