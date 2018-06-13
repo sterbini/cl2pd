@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def raw2bbb(rawInput,fill=np.arange(3564)):
+def list2col(rawInput,fill=np.arange(3564)):
     '''
     Input: 
     rawInput is a pandas Series containing vectors (FBCT, lumi, etc...)
