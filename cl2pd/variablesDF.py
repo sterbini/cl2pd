@@ -113,7 +113,12 @@ LHC=pd.DataFrame([['LHC.BOFSU:OFC_ENERGY','Energy','NUMERIC',True,'Beam energy']
               ['TCTPH.4R5.B2:MEAS_LVDT_LU','Wire R5 B2','NUMERIC', False,'Wire-collimator LVDT'],
               ['TCTPH.4R5.B2:MEAS_LVDT_RD','Wire R5 B2','NUMERIC', False,'Wire-collimator LVDT'],  
               ['TCTPH.4R5.B2:MEAS_LVDT_RU','Wire R5 B2','NUMERIC', False,'Wire-collimator LVDT'],  
-              ['TCTPH.4R5.B2:MEAS_V_LVDT_POS','Wire R5 B2','NUMERIC', False,'Wire-collimator LVDT Vertical'],  
+              ['TCTPH.4R5.B2:MEAS_V_LVDT_POS','Wire R5 B2','NUMERIC', False,'Wire-collimator LVDT Vertical'],
+                  
+              ['LHC.BLM.LIFETIME:B1_BEAM_LIFETIME', 'Lifetime', 'NUMERIC', False, 'BLM Lifetime B1'],
+              ['LHC.BLM.LIFETIME:B1_CALIBRATED_LOSS', 'Losses', 'NUMERIC', False, 'BLM Calibrated losses B1'],
+              ['LHC.BLM.LIFETIME:B2_BEAM_LIFETIME', 'Lifetime', 'NUMERIC', False, 'BLM Lifetime B2'],
+              ['LHC.BLM.LIFETIME:B2_CALIBRATED_LOSS', 'Losses', 'NUMERIC', False, 'BLM Calibrated losses B2'],
               
               ['LHC.BOFSU:POSITIONS_H','Horizontal position','VECTOR NUMERIC', False, 'Beams H-position around the machine'],
               ['LHC.BOFSU:POSITIONS_V','Vertical position','VECTOR NUMERIC', False, 'Beams V-position around the machine']
