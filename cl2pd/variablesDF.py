@@ -23,18 +23,18 @@ LHC=pd.DataFrame([['LHC.BOFSU:OFC_ENERGY','Energy','NUMERIC',True,'Beam energy']
               ['LHC.BQBBQ.CONTINUOUS.B2:FFT_DATA_H', 'Tune FFT','NUMERIC' , False,'Tune FFT H B2'],
               ['LHC.BQBBQ.CONTINUOUS.B2:FFT_DATA_V', 'Tune FFT','NUMERIC', False,'Tune FFT V B2'],
                   
-              ['LHC.BCTFR.A6R4.B1:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Main FBCT B1'],
-              ['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Main FBCT B2'],
-              ['LHC.BCTFR.B6R4.B1:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Spare FBCT B1'],
-              ['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY', 'Intensity', 'NUMERIC', False, 'Spare FBCT B2'],
+              ['LHC.BCTFR.A6R4.B1:BUNCH_INTENSITY', 'Intensity', 'VECTOR NUMERIC', False, 'Main FBCT B1'],
+              ['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY', 'Intensity', 'VECTOR NUMERIC', False, 'Main FBCT B2'],
+              ['LHC.BCTFR.B6R4.B1:BUNCH_INTENSITY', 'Intensity', 'VECTOR NUMERIC', False, 'Spare FBCT B1'],
+              ['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY', 'Intensity', 'VECTOR NUMERIC', False, 'Spare FBCT B2'],
                   
               ['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN', 'Filling Pattern', 'NUMERIC', False, 'Main FBCT B1'],
               ['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN', 'Filling Pattern', 'NUMERIC', False, 'Main FBCT B2'],
               ['LHC.BCTFR.B6R4.B1:BUNCH_FILL_PATTERN', 'Filling Pattern', 'NUMERIC', False, 'Spare FBCT B1'],
               ['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN', 'Filling Pattern', 'NUMERIC', False, 'Spare FBCT B2'],
                   
-              ['CMS:BUNCH_LUMI_INST', 'Luminosity', 'NUMERIC', False, 'CMS bbb luminosity'],
-              ['ATLAS:BUNCH_LUMI_INST', 'Luminosity', 'NUMERIC', False, 'ATLAS bbb luminosity'],
+              ['CMS:BUNCH_LUMI_INST', 'Luminosity', 'VECTOR NUMERIC', False, 'CMS bbb luminosity'],
+              ['ATLAS:BUNCH_LUMI_INST', 'Luminosity', 'VECTOR NUMERIC', False, 'ATLAS bbb luminosity'],
                     
               ['RPMC.UL14.RBBCW.L1B2:I_MEAS','Wire L1 B2','NUMERIC', True,'Wire current'],
               ['RPMC.UL16.RBBCW.R1B2:I_MEAS','Wire R1 B2','NUMERIC', True,'Wire current'],
@@ -126,7 +126,7 @@ LHC=pd.DataFrame([['LHC.BOFSU:OFC_ENERGY','Energy','NUMERIC',True,'Beam energy']
               ['LHC.BLM.LIFETIME:B2_CALIBRATED_LOSS', 'Losses', 'NUMERIC', False, 'BLM Calibrated losses B2'],
               
               ['LHC.BOFSU:POSITIONS_H','Horizontal position','VECTOR NUMERIC', False, 'Beams H-position around the machine'],
-              ['LHC.BOFSU:POSITIONS_V','Vertical position','VECTOR NUMERIC', False, 'Beams V-position around the machine']
-      
+              ['LHC.BOFSU:POSITIONS_V','Vertical position','VECTOR NUMERIC', False, 'Beams V-position around the machine'],
+                   
               ],
                    columns=['Variable','Tag','Type','On change', 'Description'])
