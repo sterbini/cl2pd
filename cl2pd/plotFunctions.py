@@ -73,8 +73,8 @@ def plotLHCFill(myFill,myTitle,startTime):
         myFill=importData.LHCFillsByNumber([6797,6798,6799])
         plotFunctions.plotLHCFill(myFill,myTitle="This is my title",startTime=pd.Timestamp('2018-06-14 19:39:39.435000'))
         """ 
-        aux=fillDF[fillDF['mode']=='FILL']
-        b=fillDF[fillDF['mode']!='FILL']
+        aux=myFill[myFill['mode']=='FILL']
+        b=myFill[myFill['mode']!='FILL']
         def colorMe(i):
             if np.mod(i,2):
                 return "m"
