@@ -1,3 +1,5 @@
+import numpy as np 
+
 def computeBBMatrix(numberOfLRToConsider=20):
         """
         It returns a beam-beam matrix. 
