@@ -310,9 +310,9 @@ def LHCFillsByNumber(fillList, verbose=False):
     fillsSummary['mode']='FILL'
     # Following two lines important for consecutive fills without modes (e.g., LHCFillsByNumber([6577,6578],verbose=True))
     aux=fillsSummary
-    aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]    
 
     if len(fillsSummary)>0:
+        aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]    
         if (len(fillsSummary)==1) & (fillsSummary.iloc[0]['duration']==None):
             # If there is only the online FILL (so not yet completed)
             # TODO: very cumbersome casting (first to string, then concatenation, then to timestamp)
