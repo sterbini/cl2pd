@@ -692,8 +692,9 @@ def LHCInstant(t1,timeSpan_days=1):
 def _LHCCals2pd_ver1(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
                      fill_column=False, beamMode_column=False):
     '''
-    LHCCals2pd(listOfVariables, fillList, beamModeList='FILL', split=1, verbose=False)
-
+    _LHCCals2pd_ver1(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
+                     fill_column=False, beamMode_column=False)
+                     
     Return the listOfVariables in the fill of the fillList for a given list of beamModeList. 
 
     It can be used in the verbose mode if the corresponding flag is True.
@@ -734,3 +735,110 @@ def _LHCCals2pd_ver1(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
         return pd.DataFrame()
     else:
         return pd.concat(listDF).sort_index()
+    
+def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
+                     fill_column=False, beamMode_column=False, flag='', offset=pd.Timedelta(0), duration=pd.Timedelta('5s')):
+    '''
+    _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
+                     fill_column=False, beamMode_column=False, flag='', offset=pd.Timedelta(0), duration=pd.Timedelta('5s')
+    Return the listOfVariables in the fill of the fillList for a given list of beamModeList. 
+    It can be used in the verbose mode if the corresponding flag is True.
+    The data extraction can be done splitting it in several n intervals (split=n).
+    If fill_column and beamMode_column are True then also the fill and the mode is included 
+    in the df.
+    It is possible to add an offset (default is offset=pd.Timedelta(0)): this will offset the the startTime and endTime.
+    If flag is 'next' or 'last', the next or last  measurement after or before the startTime (+offset) will be returned.
+    if flag is 'duration' the extraction will be between [t1,t2], with t1=(startTime+offset) and t2=(startTime+offset+duration).
+    The default value of duration is pd.Timedelta('5s')
+    
+    ===Example===     
+    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666],['RAMP','FLATTOP'])
+    
+    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='duration',fill_column=True, beamMode_column=True, offset=pd.Timedelta('5s'),duration=pd.Timedelta('60s'))
+    
+    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='next',fill_column=True, beamMode_column=True,fill_column=True, beamMode_column=True,)
+    '''
+    if len(listOfVariables)==0:
+        return pd.DataFrame()
+
+    fillList=np.unique(fillList)
+    beamModeList=np.unique(beamModeList)
+
+    listDF=[]
+    
+    if flag=='':
+        for fill in fillList: 
+            if verbose: print('Fill: '+str(fill))
+            fillDF=LHCFillsByNumber(fill)
+            for BM in beamModeList:
+                aux=fillDF[fillDF['mode']==BM]
+                if verbose: print('Beam mode: '+BM)
+
+                for index,row in aux.iterrows():
+                    t1=row.startTime+offset
+                    t2=row.endTime+offset
+                    if verbose: print('Start time: '+str(t1))
+                    if verbose: print('End time: '+str(t2))
+                    #TO CHANGE  
+                    out=importData.cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
+                    if fill_column:
+                        out['fill']=fill
+                    if beamMode_column:
+                        out['mode']=BM
+                    listDF.append(out)
+        if listDF==[]:
+            return pd.DataFrame()
+        else:
+            return pd.concat(listDF).sort_index()
+        
+    if (flag=='last') or (flag=='next'):
+        for fill in fillList: 
+            if verbose: print('Fill: '+str(fill))
+            fillDF=LHCFillsByNumber(fill)
+            for BM in beamModeList:
+                aux=fillDF[fillDF['mode']==BM]
+                if verbose: print('Beam mode: '+BM)
+
+                for index,row in aux.iterrows():
+                    t1=row.startTime+offset
+                    t2=flag
+                    if verbose: print('Start time: '+str(t1))
+                    if verbose: print('End time: '+str(t2))
+                    #TO CHANGE  
+                    out=importData.cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
+                    if fill_column:
+                        out['fill']=fill
+                    if beamMode_column:
+                        out['mode']=BM
+                    listDF.append(out)
+        if listDF==[]:
+            return pd.DataFrame()
+        else:
+            return pd.concat(listDF).sort_index()
+        
+    if (flag=='duration'):
+        for fill in fillList: 
+            if verbose: print('Fill: '+str(fill))
+            #TO CHANGE  
+            fillDF=importData.LHCFillsByNumber(fill)
+            for BM in beamModeList:
+                aux=fillDF[fillDF['mode']==BM]
+                if verbose: print('Beam mode: '+BM)
+
+                for index,row in aux.iterrows():
+                    t1=row.startTime+offset
+                    t2=t1+duration
+                    if verbose: print('Start time: '+str(t1))
+                    if verbose: print('End time: '+str(t2))
+                    #TO CHANGE  
+                    out=importData.cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
+                    if fill_column:
+                        out['fill']=fill
+                    if beamMode_column:
+                        out['mode']=BM
+                    listDF.append(out)
+        if listDF==[]:
+            return pd.DataFrame()
+        else:
+            return pd.concat(listDF).sort_index()
+
