@@ -779,8 +779,7 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
                     t2=row.endTime+offset
                     if verbose: print('Start time: '+str(t1))
                     if verbose: print('End time: '+str(t2))
-                    #TO CHANGE  
-                    out=importData.cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
+                    out=cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
                     if fill_column:
                         out['fill']=fill
                     if beamMode_column:
@@ -804,8 +803,7 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
                     t2=flag
                     if verbose: print('Start time: '+str(t1))
                     if verbose: print('End time: '+str(t2))
-                    #TO CHANGE  
-                    out=importData.cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
+                    out=cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
                     if fill_column:
                         out['fill']=fill
                     if beamMode_column:
@@ -819,8 +817,7 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
     if (flag=='duration'):
         for fill in fillList: 
             if verbose: print('Fill: '+str(fill))
-            #TO CHANGE  
-            fillDF=importData.LHCFillsByNumber(fill)
+            fillDF=LHCFillsByNumber(fill)
             for BM in beamModeList:
                 aux=fillDF[fillDF['mode']==BM]
                 if verbose: print('Beam mode: '+BM)
@@ -830,8 +827,7 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
                     t2=t1+duration
                     if verbose: print('Start time: '+str(t1))
                     if verbose: print('End time: '+str(t2))
-                    #TO CHANGE  
-                    out=importData.cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
+                    out=cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
                     if fill_column:
                         out['fill']=fill
                     if beamMode_column:
