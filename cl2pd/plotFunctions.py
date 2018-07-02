@@ -196,3 +196,44 @@ def shadedDF(gca, df, color='g', alpha=0.5):
         et=pd.Timestamp(i[1]['endTime']).to_pydatetime()
         gca.fill_between([st, et], [myYlim[0],myYlim[0]], [myYlim[1],myYlim[1]],color=color, alpha=alpha)
     gca.set_ylim(myYlim)    
+
+def plot_BBMatrix(BBMatrixLHC, B1_bunches, B2_bunches,alpha=.2, width=1):
+    """
+    It plots a beam-beam matrix.
+
+    ===Example===
+    from cl2pd import importData
+    from cl2pd import bbFunctions
+    from cl2pd import plotFunctions
+    np=plotFunctions.np
+    pd=plotFunctions.pd
+
+    myMatrix=bbFunctions.computeBBMatrix(numberOfLRToConsider=20)
+    fillingSchemeDF=importData.cals2pd(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],
+                               pd.Timestamp('2017-09-13 18:00',tz='CET'),
+                               pd.Timestamp('2017-09-13 18:01',tz='CET'))
+    B1_bunches=np.where(fillingSchemeDF.iloc[0]['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'])[0]
+    B2_bunches=np.where(fillingSchemeDF.iloc[0]['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'])[0]
+
+    plotFunctions.plot_BBMatrix(BBMatrixLHC, B1_bunches, B2_bunches)
+    """ 
+    plt.figure(figsize=(10,10))
+    plt.jet()
+    plt.imshow(BBMatrixLHC,interpolation='none')
+    plt.axis('tight')
+    plt.xlabel('BEAM 2')
+    plt.ylabel('BEAM 1')
+    plt.axis('equal')
+    plt.axis('tight');
+    plt.tick_params(direction='inout')
+    for i in B2_bunches:
+        setShadedRegion(plt.gca(), xLimit=[i-width+1, i+width],alpha=alpha,color='w')
+
+    for i in B1_bunches:
+        plt.gca().fill_between([0,3564], [i-width+1,i-width+1],  [i+width,i+width],color='w', alpha=alpha)
+
+    setArrowLabel(ax=plt.gca(),label='IP1/5',labelPosition=(2000,2000), arrowPosition=(2000,2000), myColor='k')
+    setArrowLabel(ax=plt.gca(),label='IP2',labelPosition=(2000,1100), arrowPosition=(2000,1100), myColor='k')
+    setArrowLabel(ax=plt.gca(),label='IP8',labelPosition=(2000,2900), arrowPosition=(2000,2900), myColor='k')
+    setArrowLabel(ax=plt.gca(),label='IP8',labelPosition=(3130,3564-3130), arrowPosition=(3130,3564-3130), myColor='k')
+    setArrowLabel(ax=plt.gca(),label='IP2',labelPosition=(3564-3130,3130), arrowPosition=(3564-3130,3130), myColor='k');
