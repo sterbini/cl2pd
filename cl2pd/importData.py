@@ -1,6 +1,7 @@
 import pandas as pd 
 import numpy as np
 import os
+import inspect
 # Fundamental contribution by R. De Maria et al.
 import pytimber
 
@@ -842,3 +843,114 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
         else:
             return pd.concat(listDF).sort_index()
 
+def LHCFillsVarsModes2pd (listOfVariables, fillNos, beamModeList = None, functionList = None, flag = None, offset = None, duration = None):
+    '''
+    
+    For the selected fill numbers, beam modes and list of variables, this function creates 
+    a list for each variable on which it applies the coresponding function. The result is 
+    returned as output. If function is set to None, than no processing of the data is done.
+    If one function is set as input, that one function is applied to all of the variables. 
+    If number of functions must is the same as the number of variables, each variable is 
+    processed by the coresponding function.
+    
+    It is possible to add an offset. This will offset the the startTime and endTime.
+    If flag is 'next' or 'last', the next or last  measurement after or before the startTime (+offset) will be returned.
+    if flag is 'duration' the extraction will be between [t1,t2], with t1=(startTime+offset) and t2=(startTime+offset+duration).
+    If some of these parameters are not set, the default ones from the function _LHCCals2pd_ver2 are used.
+    
+    ===EXAMPLE===
+    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800))
+    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'])
+    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'], [pd.Series.mean, pd.Series.max], 'last')
+    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), 'PRERAMP', pd.Series.max, 'last')
+    
+    '''
+    # FOR DEBUGGING 
+    # import pdb
+    # pdb.set_trace()
+    
+    # Fetching the default values from the _LHCCals2pd_ver2 function.
+    # Doing it like this so in case the default values change, you don't have to modify the function
+    # Current look of default values
+    # [('beamModeList', 'FILL'),
+    # ('split', 1),
+    # ('verbose', False),
+    # ('fill_column', False),
+    # ('beamMode_column', False),
+    # ('flag', ''),
+    # ('offset', Timedelta('0 days 00:00:00')),
+    # ('duration', Timedelta('0 days 00:00:05'))]
+    
+    a = inspect.getargspec(_LHCCals2pd_ver2)
+    defaultValues = zip(a.args[-len(a.defaults):],a.defaults)
+    
+    defaultBeamModeList = defaultValues[0][1]
+    defaultFlag = defaultValues[5][1]
+    defaultOffset = defaultValues[6][1]
+    defaultDuration = defaultValues[7][1]
+    
+    ## PROCESSING OF THE INPUT VARIABLES
+    
+    #listOfVariables
+    if isinstance(listOfVariables, str):
+        listOfVariables = [listOfVariables]
+    
+    #fillNos
+    if isinstance(fillNos, (int, long)):
+        fillNos = [fillNos]
+        # This is done so that the for loop can work properly
+        
+    #beamModeList
+    if beamModeList == None:
+        beamModeList = defaultBeamModeList        
+                
+    #functionList
+    if callable(functionList):
+        functionList = [functionList]
+        
+    #flag
+    if flag == None:
+        flag = defaultFlag
+    
+    #offset
+    if offset == None:
+        offset = defaultOffset
+    
+    #duration
+    if duration == None:
+        duration = defaultDuration
+                       
+    NoOfVar = len(listOfVariables)
+    NoOfFills = len(fillNos)
+    NoOfModes = len(beamModeList)
+    
+    resultDF = pd.DataFrame()
+    data = _LHCCals2pd_ver2(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
+        
+    # Special interactions with the function list
+    if functionList == None:
+        # No need to do anything to the data excpet multindex it so the output is always multiindexed
+        resultDF = data.set_index(['fill', 'mode'])
+    else:    
+        
+        NoOfFunctions = len(functionList)
+
+        # This flag is set to 1 if we have a list of functions, it is reset to 0 if it only has one function
+        functionFlag = 1
+        if NoOfFunctions == 1:
+            functionFlag = 0
+        elif NoOfFunctions != NoOfVar:
+            raise AttributeError("Number of functions not the same size as number of variables.")
+
+
+        grupedData = data.groupby(['fill', 'mode'])
+        for i in range(0, NoOfVar):
+            resultDF[listOfVariables[i]] = grupedData[listOfVariables[i]].agg(functionList[i * functionFlag])
+
+        
+    #Fetching of the time data
+    timeData = LHCFillsByNumber(fillNos)
+    timeData['fill'] = timeData.index
+    timeData = timeData.set_index(['fill', 'mode'])            
+
+    return resultDF.join(timeData)
