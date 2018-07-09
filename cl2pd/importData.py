@@ -881,7 +881,7 @@ def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, function
     # ('offset', Timedelta('0 days 00:00:00')),
     # ('duration', Timedelta('0 days 00:00:05'))]
     
-    a = inspect.getargspec(_LHCCals2pd_ver2)
+    a = inspect.getargspec(LHCCals2pd)
     defaultValues = zip(a.args[-len(a.defaults):],a.defaults)
     
     defaultBeamModeList = defaultValues[0][1]
