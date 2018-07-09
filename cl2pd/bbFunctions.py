@@ -92,3 +92,77 @@ def computeBBMatrix(numberOfLRToConsider):
             BBMatrixLHC[index-i,index-(availableBunchSlot-IP8slot)]=80
 
         return BBMatrixLHC;
+
+def _bunch_BB_pattern(Bunch,BBMatrixLHC):
+    '''
+    It returns the beam-beam pattern of a bunch of B1 and B2 [adimensional array of integer] in ALICE, ATLAS, CMS, LHCB.
+    
+    - Bunch [adimensional integer]: the bunch number in B1 and B2 to consider.
+    - BBMatrixLHC [adimensional integer matrix]: the beam-beam matrix to consider (see bbFunctions.computeBBMatrix?).
+    The returned array is ordered with respect to the positive direction of B1 (clockwise in LHC). 
+    WARNING: the bunch number is defined wrt the negative direction of each beam.
+    
+    Conventions :
+    
+    ...=>B1 bunch 1 => B1 bunch 0 => |[IP]| <= B2 bunch 0 <= B2 bunch 1 <=...
+    
+    This means that B1 bunch 0 will meet B2 bunch 1 on the positive side of the IP and B2 bunch 0 will meet B1 bunch 0 on the negative side of IP1 (positive/negative wrt the B1).
+    
+    '''
+    
+    #### BEAM 1 ####
+    BBVector=BBMatrixLHC[Bunch,:]
+    
+    numberOfLRToConsider=len(np.where(BBMatrixLHC[Bunch,:]==10)[0])/2
+    HO_in_IP=BBVector==1
+    LR_in_IP=BBVector==10
+    aux=np.where((LR_in_IP) | (HO_in_IP))[0]
+    np.where(aux==Bunch)[0]
+    B1=np.roll(aux,  numberOfLRToConsider-np.where(aux==np.where(HO_in_IP)[0][0])[0])
+    resultsB1=dotdict({'atATLAS':B1,
+         'atCMS':B1})
+    
+    HO_in_IP=BBVector==2
+    LR_in_IP=BBVector==20
+    numberOfLRToConsider=len(np.where(BBMatrixLHC[Bunch,:]==20)[0])/2
+    aux=np.where((LR_in_IP) | (HO_in_IP))[0]
+    np.where(aux==Bunch)[0]
+    B1=np.roll(aux, numberOfLRToConsider-np.where(aux==np.where(HO_in_IP)[0][0])[0])
+    resultsB1.update({'atALICE':B1})
+    
+    HO_in_IP=BBVector==8
+    LR_in_IP=BBVector==80
+    numberOfLRToConsider=len(np.where(BBMatrixLHC[Bunch,:]==80)[0])/2
+    aux=np.where((LR_in_IP) | (HO_in_IP))[0]
+    np.where(aux==Bunch)[0]
+    B1=np.roll(aux, numberOfLRToConsider-np.where(aux==np.where(HO_in_IP)[0][0])[0])
+    resultsB1.update({'atLHCB':B1})
+    
+    #### BEAM 2 ####
+    BBVector=BBMatrixLHC[:,Bunch]
+    numberOfLRToConsider=len(np.where(BBMatrixLHC[Bunch,:]==10)[0])/2
+    HO_in_IP=BBVector==1
+    LR_in_IP=BBVector==10
+    aux=np.where((LR_in_IP) | (HO_in_IP))[0]
+    np.where(aux==Bunch)[0]
+    B2=np.roll(aux,  numberOfLRToConsider-np.where(aux==np.where(HO_in_IP)[0][0])[0])
+    resultsB2=dotdict({'atATLAS':B2[::-1], 
+         'atCMS':B2[::-1]}) # To note the inverstion of the direction
+   
+    HO_in_IP=BBVector==2
+    LR_in_IP=BBVector==20
+    numberOfLRToConsider=len(np.where(BBMatrixLHC[Bunch,:]==20)[0])/2
+    aux=np.where((LR_in_IP) | (HO_in_IP))[0]
+    np.where(aux==Bunch)[0]
+    B2=np.roll(aux, numberOfLRToConsider-np.where(aux==np.where(HO_in_IP)[0][0])[0])
+    resultsB2.update({'atALICE':B2[::-1]})
+    
+    HO_in_IP=BBVector==8
+    LR_in_IP=BBVector==80
+    numberOfLRToConsider=len(np.where(BBMatrixLHC[Bunch,:]==80)[0])/2
+    aux=np.where((LR_in_IP) | (HO_in_IP))[0]
+    np.where(aux==Bunch)[0]
+    B2=np.roll(aux, numberOfLRToConsider-np.where(aux==np.where(HO_in_IP)[0][0])[0])
+    resultsB2.update({'atLHCB':B2[::-1]})
+    # The encounters seen by  B1/2 are in increasing/decreasing order
+    return dotdict({'atB1':resultsB1, 'atB2':resultsB2})
