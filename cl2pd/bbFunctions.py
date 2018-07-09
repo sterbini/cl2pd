@@ -1,4 +1,6 @@
 import numpy as np 
+import dotdict
+
 
 def computeBBMatrix(numberOfLRToConsider):
         """
