@@ -237,3 +237,38 @@ def plot_BBMatrix(BBMatrixLHC, B1_bunches, B2_bunches,alpha=.2, width=1):
     setArrowLabel(ax=plt.gca(),label='IP8',labelPosition=(2000,2900), arrowPosition=(2000,2900), myColor='k')
     setArrowLabel(ax=plt.gca(),label='IP8',labelPosition=(3130,3564-3130), arrowPosition=(3130,3564-3130), myColor='k')
     setArrowLabel(ax=plt.gca(),label='IP2',labelPosition=(3564-3130,3130), arrowPosition=(3564-3130,3130), myColor='k');
+    
+def plotBBEncounterSchedule(BBEncounterSchedule,beam,bunch,exp):
+    '''
+    Plot the encounter schedule for a specific beam, bunch, and experiment.
+    
+    ===EXAMPLE===
+    B1_bunches=np.array([0,1,2])
+    B2_bunches=np.array([0,1,2])
+    myMatrix=bbFunctions.computeBBMatrix(numberOfLRToConsider=25)
+    results=bbFunctions.BBEncounterSchedule(B1_bunches, B2_bunches, myMatrix)
+    plotFunctions.plotBBEncounterSchedule(results,beam='atB1',exp='atCMS',bunch=0)
+    '''
+    bunch_aux=bunch
+    bunch='at'+format(bunch,'04d')
+    x=BBEncounterSchedule[beam][bunch][exp]['atPositions']
+    y=[1]*len(x)
+    plt.plot(x,y,'ok')
+    plt.xlim(-25,25)
+    plt.ylim(.94, 1.06)
+
+    plt.yticks([])
+    plt.xlabel('BBLR encounter position')
+    plt.title(beam[2:]+ ', ' + exp[2:] + ', bunch=' + str(bunch_aux))
+
+    if len(x)>0:
+        encounters=BBEncounterSchedule[beam][bunch][exp]['atEncounters']
+        if beam=='B1':
+            setArrowLabel(plt.gca(), label=str(encounters[0]), arrowPosition=(x[0], y[0]), labelPosition=(x[0]-5, y[0]+.01), myColor='b', arrowArc_rad=0.2)
+            setArrowLabel(plt.gca(), label=str(encounters[-1]), arrowPosition=(x[-1], y[-1]), labelPosition=(x[-1]+5, y[-1]-.01), myColor='r', arrowArc_rad=0.2)
+        else:
+            setArrowLabel(plt.gca(), label=str(encounters[0]), arrowPosition=(x[0], y[0]), labelPosition=(x[0]-5, y[0]+.01), myColor='b', arrowArc_rad=-0.2)
+            setArrowLabel(plt.gca(), label=str(encounters[-1]), arrowPosition=(x[-1], y[-1]), labelPosition=(x[-1]+5, y[-1]-.01), myColor='r', arrowArc_rad=-0.2)
+    ax1=plt.gca()
+    plt.grid(ls=':')
+    return ax1 
