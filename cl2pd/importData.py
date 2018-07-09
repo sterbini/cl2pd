@@ -631,7 +631,7 @@ def tfs2pd(myList):
     else:
         return _tfs2pd(myList)
     
-def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False):
+def _LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False):
     '''
     LHCCals2pd(listOfVariables, fillList, beamModeList='FILL', split=1, verbose=False)
 
@@ -741,10 +741,10 @@ def _LHCCals2pd_ver1(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
     else:
         return pd.concat(listDF).sort_index()
     
-def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
+def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
                      fill_column=False, beamMode_column=False, flag='', offset=pd.Timedelta(0), duration=pd.Timedelta('5s')):
     '''
-    _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
+    LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
                      fill_column=False, beamMode_column=False, flag='', offset=pd.Timedelta(0), duration=pd.Timedelta('5s')
     Return the listOfVariables in the fill of the fillList for a given list of beamModeList. 
     It can be used in the verbose mode if the corresponding flag is True.
@@ -757,11 +757,11 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
     The default value of duration is pd.Timedelta('5s')
     
     ===Example===     
-    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666],['RAMP','FLATTOP'])
+    importData.LHCCals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666],['RAMP','FLATTOP'])
     
-    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='duration',fill_column=True, beamMode_column=True, offset=pd.Timedelta('5s'),duration=pd.Timedelta('60s'))
+    importData.LHCCals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='duration',fill_column=True, beamMode_column=True, offset=pd.Timedelta('5s'),duration=pd.Timedelta('60s'))
     
-    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='next',fill_column=True, beamMode_column=True,fill_column=True, beamMode_column=True,)
+    importData.LHCCals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='next',fill_column=True, beamMode_column=True,fill_column=True, beamMode_column=True,)
     '''
     if len(listOfVariables)==0:
         return pd.DataFrame()
@@ -843,7 +843,7 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
         else:
             return pd.concat(listDF).sort_index()
 
-def LHCFillsVarsModes2pd (listOfVariables, fillNos, beamModeList = None, functionList = None, flag = None, offset = None, duration = None):
+def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, functionList = None, flag = None, offset = None, duration = None):
     '''
     
     For the selected fill numbers, beam modes and list of variables, this function creates 
@@ -859,10 +859,10 @@ def LHCFillsVarsModes2pd (listOfVariables, fillNos, beamModeList = None, functio
     If some of these parameters are not set, the default ones from the function _LHCCals2pd_ver2 are used.
     
     ===EXAMPLE===
-    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800))
-    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'])
-    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'], [pd.Series.mean, pd.Series.max], 'last')
-    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), 'PRERAMP', pd.Series.max, 'last')
+    LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800))
+    LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'])
+    LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'], [pd.Series.mean, pd.Series.max], 'last')
+    LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), 'PRERAMP', pd.Series.max, 'last')
     
     '''
     # FOR DEBUGGING 
@@ -925,11 +925,11 @@ def LHCFillsVarsModes2pd (listOfVariables, fillNos, beamModeList = None, functio
     NoOfModes = len(beamModeList)
     
     resultDF = pd.DataFrame()
-    data = _LHCCals2pd_ver2(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
+    data = LHCCals2pd(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
         
     # Special interactions with the function list
     if functionList == None:
-        # No need to do anything to the data excpet multindex it so the output is always multiindexed
+        # No need to do anything to the data expect multindex it so the output is always multi-indexed
         resultDF = data.set_index(['fill', 'mode'])
     else:    
         
