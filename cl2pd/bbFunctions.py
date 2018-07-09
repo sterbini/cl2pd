@@ -166,3 +166,53 @@ def _bunch_BB_pattern(Bunch,BBMatrixLHC):
     resultsB2.update({'atLHCB':B2[::-1]})
     # The encounters seen by  B1/2 are in increasing/decreasing order
     return dotdict({'atB1':resultsB1, 'atB2':resultsB2})
+
+def BBEncounterSchedule(B1_fillingScheme,B2_fillingScheme,BBMatrixLHC):
+    """
+    It returns a dictionary structure with the BB encounters of B1 and B2 taking into account the filling schemes.
+    - B1_fillingScheme [adimensional integer array]: the B1 filling scheme.
+    - B2_fillingScheme [adimensional integer array]: the B2 filling scheme.
+    The dictionary structure has the following hierarchy:
+    - BEAM >> BUNCH >> EXPERIMENT >> ENCOUNTERS
+    - BEAM >> BUNCH >> EXPERIMENT >> POSITIONS
+    All the positions are referred to the positive direction of B1 (clockwise in LHC).
+    WARNING: the bunch number is defined wrt the negative direction of each beam.
+    
+    === EXAMPLE 1 ===
+    from cl2pd import bbFunctions
+    from cl2pd import importData
+   
+    np=importData.np  
+    BBMatrixLHC=bbFunctions.computeBBMatrix(numberOfLRToConsider=25)
+    B1_bunches=np.array([0,1,2])
+    B2_bunches=np.array([0,1,2])
+    results=beam_BB_pattern(B1_bunches, B2_bunches, BBMatrixLHC)
+    """
+    experiments=['atALICE','atATLAS','atCMS','atLHCB']
+
+    #B1
+    B1_BB_pattern=dotdict()
+    for i in B1_fillingScheme:
+        bunch_aux=dotdict()
+        for j in experiments:
+            results=_bunch_BB_pattern(i,BBMatrixLHC)
+            B2=results['atB1'][j]
+            aux=B2[np.in1d(B2,B2_fillingScheme)]
+            myPosition=np.arange(-(len(B2)-1)/2,(len(B2)-1)/2+1)
+            bunch_aux.update({j: {'atEncounters' : aux,'atPositions':myPosition[np.in1d(B2,B2_fillingScheme)]}})
+            B1_BB_pattern.update({'at'+format(i,'04d'):bunch_aux})
+
+    #B2
+    B2_BB_pattern=dotdict()
+    for i in B2_fillingScheme:
+        bunch_aux=dotdict()
+        for j in experiments:
+            results=_bunch_BB_pattern(i,BBMatrixLHC)
+            B1=results['atB2'][j]
+            aux=B1[np.in1d(B1,B1_fillingScheme)]
+            myPosition=np.arange(-(len(B1)-1)/2,(len(B1)-1)/2+1)
+            bunch_aux.update({j: {'atEncounters' : aux,'atPositions':myPosition[np.in1d(B1,B1_fillingScheme)]}})
+            B2_BB_pattern.update({'at'+format(i,'04d'):bunch_aux})
+
+    beam_BB_pattern=dotdict({'atB1':B1_BB_pattern,'atB2':B2_BB_pattern})
+    return beam_BB_pattern
