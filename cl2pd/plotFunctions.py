@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 def setSourcePlot(gca, pltDescription,x=0.99,y=0.01,horizontalalignment='right',\
-                  color='lightgray',verticalalignment='bottom',rotation=0,fontsize=7):
+                  color='k',verticalalignment='bottom',rotation=0,fontsize=7):
   '''
   Comment the plot adding for instance the source script.
    
@@ -13,7 +13,7 @@ def setSourcePlot(gca, pltDescription,x=0.99,y=0.01,horizontalalignment='right',
   ===EXAMPLE===
   plt.plot([1,2,3,])
   setSourcePlot(plt.gca(), pltDescription,x=0.99,y=0.01,horizontalalignment='right',\
-                  color='lightgray',verticalalignment='bottom',rotation=0,fontsize=7)
+                  color='k',verticalalignment='bottom',rotation=0,fontsize=7)
   '''
   plt.text(x,y,pltDescription, 
              horizontalalignment=horizontalalignment, 
