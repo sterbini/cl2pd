@@ -17,7 +17,7 @@ def computeBBMatrix(numberOfLRToConsider):
         The matrix element has a value 1, 2, 5 and 8 when there is a HO  in IP1, 2, 5 and 8, respectively.
         The matrix element has a value 10, 20, 50 and  80 when there is a LR respectively in IR1, 2, 5 and 8, respectively.
         
-        It assumes that the positions of the IPs and the convention of the B1/B2 bunch numbering is such that:
+        It assumes that the positions of the IPs and the convention of the B1/B2 bunch numbering are such that:
         
         1. B1 Bunch 0 meets B2 Bunch 0 in IP1 and 5.
         2. B1 Bunch 0 meets B2 Bunch 891 in IP2.
