@@ -17,10 +17,14 @@ def computeBBMatrix(numberOfLRToConsider):
         The matrix element has a value 1, 2, 5 and 8 when there is a HO  in IP1, 2, 5 and 8, respectively.
         The matrix element has a value 10, 20, 50 and  80 when there is a LR respectively in IR1, 2, 5 and 8, respectively.
         
-        It assumes that the positions of the IPs and the convention of the B1/B2 bunch numbering is such that.
+        It assumes that the positions of the IPs and the convention of the B1/B2 bunch numbering is such that:
+        
         1. B1 Bunch 0 meets B2 Bunch 0 in IP1 and 5.
         2. B1 Bunch 0 meets B2 Bunch 891 in IP2.
-        2. B1 Bunch 0 meets B2 Bunch 2670 in IP8.
+        3. B1 Bunch 0 meets B2 Bunch 2670 in IP8.
+        4. B2 Bunch 0 meets B1 Bunch 0 in IP1 and 5.
+        5. B2 Bunch 0 meets B1 Bunch 2673 in IP2.
+        6. B2 Bunch 0 meets B1 Bunch 894 in IP8.
 
         === EXAMPLE 1 ===
         myMatrix=computeBBMatrix(numberOfLRToConsider=20)
