@@ -400,3 +400,62 @@ def BB2Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
 
 
     return B2df
+
+def genericFillingPatern(booleanList, flagChars = ['e', 'f']):
+    '''
+    
+    For a given boolean list, this function returns a string which represents the counting operation of boolean values. For example
+    booleanList = [False, False, True, False, False, False] would return "2e1f3e"
+    Character flags that represent true or false can be edited with flagChars variable
+    
+    f - full ~ True
+    e - empty ~ False
+    
+    ===EXAMPLE===
+    genericFillingPatern([True, True, True, False, False, False, True])
+        
+    '''
+
+    
+    #pdb.set_trace()
+    
+    counter = [0, 0]
+    result = ''
+    
+    lengthList = len(booleanList)
+    if lengthList == 0:
+        raise Error()
+    currentStatus = booleanList[0]
+    
+    for i in range(0, lengthList):
+        
+        if currentStatus == booleanList[i]:
+            counter[int(currentStatus)] = counter[int(currentStatus)] + 1
+            if i == lengthList - 1:
+                result = result + str(counter[int(currentStatus)]) + flagChars[int(currentStatus)]    
+        else:
+            result = result + str(counter[int(currentStatus)]) + flagChars[int(currentStatus)]
+            counter[int(currentStatus)] = 0
+            
+            currentStatus = not currentStatus
+            counter[int(currentStatus)] = 1
+            
+            if i == lengthList - 1:
+                result = result + str(counter[int(currentStatus)]) + flagChars[int(currentStatus)]
+            
+    return result
+
+def bunchFillingPatern (bunchFilling, flagChars = ['e', 'f']):
+    
+    '''
+    
+    Simple function that addapts the genericFillingPatern for use in the cals2pd package
+    
+    ===EXAMPLE===
+    fillingSchemeDF=importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],6666, ['FLATTOP'],flag='next')
+    bunchFillingPatern(fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0])
+        
+    '''
+    
+    bunchesBoolean = np.array(bunchFilling) == 1.0
+    return genericFillingPatern(bunchesBoolean, flagChars)
