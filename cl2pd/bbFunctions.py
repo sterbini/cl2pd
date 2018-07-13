@@ -225,7 +225,7 @@ def BBEncounterSchedule(B1_fillingScheme,B2_fillingScheme,BBMatrixLHC):
     beam_BB_pattern=dotdict({'atB1':B1_BB_pattern,'atB2':B2_BB_pattern})
     return beam_BB_pattern
 
-def BB1Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
+def B1CollisionScheduleDF (B1_bunches, B2_bunches, numberOfLRToConsider):
     
     '''
     For given two series of booleans which represent bunches and a array that represent long range collisions, 
@@ -233,14 +233,15 @@ def BB1Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
     
     ===EXAMPLE===
     fillingSchemeDF=importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],6666, ['FLATTOP'],flag='next')
-    B1_bunches_real = np.array(fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0])
-    B1_bunches_real = B1_bunches_real == 1.0
-
-    B2_bunches_real = np.array(fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].iloc[0])
-    B2_bunches_real = B2_bunches_real == 1.0
-    BB1Collision(B1_bunches_real, B2_bunches_real, 25)
+    B1_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0]
+    B2_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].iloc[0]
+    B1CollisionScheduleDF(B1_bunches, B2_bunches, 25)
     
     '''
+    bunch_value = 1.0
+    # Transforming bunches in to boolean array
+    B1_bunches = np.array(B1_bunches) == bunch_value
+    B2_bunches = np.array(B2_bunches) == bunch_value
     
     # For debugging
     # pdb.set_trace()
@@ -290,21 +291,65 @@ def BB1Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
             collide_factor = colide_factor_list[i]
             m = (n + collide_factor) % number_of_bunches
             
+            #pdb.set_trace()
             # if this Bunch is true, than there is head on collision
             if B2_bunches[m]:
                 head_on = m
             else:
                 head_on = None
             
-            # Check does beam 2 have bunches in range  m - numberOfLRToConsider to m + numberOfLRToConsider 
-            # In this range some interaction happens
-            bunches_ineraction_temp = np.where(B2_bunches[(m - numberOfLRToConsider[i]):(m + numberOfLRToConsider[i] + 1)])[0]
+            ## Check if beam 2 has bunches in range  m - numberOfLRToConsider to m + numberOfLRToConsider 
+            ## Also have to check if bunches wrap around from 3563 to 0 or vice versa
+            
+            
+            bunches_ineraction_temp = np.array([])
+            encounters = np.array([])
+            positions = np.array([])
+            
+            first_to_consider = m - numberOfLRToConsider[i]
+            last_to_consider = m + numberOfLRToConsider[i] + 1
 
+            if n == 891 and i == 2:
+                pdb.set_trace()
+                
+            if first_to_consider < 0:
+                bunches_ineraction_partial = np.where(B2_bunches[(number_of_bunches + first_to_consider):(number_of_bunches)])[0]
+                #bunches_ineraction_temp = np.append(bunches_ineraction_temp, bunches_ineraction_partial)
+                
+                # This represents the absolute position of the bunches 
+                encounters = np.append(encounters, number_of_bunches + first_to_consider + bunches_ineraction_partial )
+                
+                #This represents the relative position to the head-on bunch
+                positions = np.append(positions, first_to_consider + bunches_ineraction_partial)
+                
+                #Set this varibale so later the normal syntax wihtout the wrap around checking can be used
+                first_to_consider = 0
+                
+            if last_to_consider > number_of_bunches:
+                bunches_ineraction_partial = np.where(B2_bunches[0:last_to_consider - number_of_bunches])[0]
+                #bunches_ineraction_temp = np.append(bunches_ineraction_temp, bunches_ineraction_partial)
+                
+                # This represents the absolute position of the bunches 
+                encounters = np.append(encounters, bunches_ineraction_partial )
+                
+                #This represents the relative position to the head-on bunch
+                positions = np.append(positions, number_of_bunches - m + bunches_ineraction_partial)
+                
+                
+                last_to_consider = number_of_bunches
+            
+            bunches_ineraction_partial = np.append(bunches_ineraction_temp, np.where(B2_bunches[first_to_consider:last_to_consider])[0])
+            
+            # This represents the absolute position of the bunches 
+            encounters = np.append(encounters, first_to_consider + bunches_ineraction_partial)
+            
+            #This represents the relative position to the head-on bunch
+            positions = np.append(positions, bunches_ineraction_partial - (m - first_to_consider))
+            
+            
             # Substract head on collision from number of secondary collisions
-            numb_of_secondary_coll = len(bunches_ineraction_temp) - int(B1_bunches[m])
+            numb_of_secondary_coll = len(bunches_ineraction_temp) - int(B2_bunches[m])
 
-            encounters = m - numberOfLRToConsider[0] + bunches_ineraction_temp
-            positions = -numberOfLRToConsider[0] + bunches_ineraction_temp
             
             dictonary.update({head_on_names[i] : { n : head_on }, secondary_names[i] : { n : numb_of_secondary_coll }, \
                              encounters_names[i] : { n : encounters },  positions_names[i] : { n : positions } })
@@ -314,7 +359,7 @@ def BB1Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
 
     return B1df
 
-def BB2Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
+def B2CollisionScheduleDF (B1_bunches, B2_bunches, numberOfLRToConsider):
     
     '''
     For given two series of booleans which represent bunches and a array that represent long range collisions, 
@@ -322,21 +367,22 @@ def BB2Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
     
     ===EXAMPLE===
     fillingSchemeDF=importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],6666, ['FLATTOP'],flag='next')
-    B1_bunches_real = np.array(fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0])
-    B1_bunches_real = B1_bunches_real == 1.0
-
-    B2_bunches_real = np.array(fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].iloc[0])
-    B2_bunches_real = B2_bunches_real == 1.0
-    BB2Collision(B1_bunches_real, B2_bunches_real, 25)
+    B1_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0]
+    B2_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].iloc[0]
+    B2CollisionScheduleDF(B1_bunches, B2_bunches, 25)
     
     '''
+    bunch_value = 1.0
+    # Transforming bunches in to boolean array
+    B1_bunches = np.array(B1_bunches) == bunch_value
+    B2_bunches = np.array(B2_bunches) == bunch_value
     
     # For debugging
     # pdb.set_trace()
     
     # Get indexes of Bunches
     B1_bunches_index = np.where(B1_bunches)[0]
-    B2_bunches_index = np.where(B1_bunches)[0]
+    B2_bunches_index = np.where(B2_bunches)[0]
     
     if isinstance(numberOfLRToConsider, (int, long)):
         numberOfLRToConsider = [numberOfLRToConsider, numberOfLRToConsider, numberOfLRToConsider]
@@ -345,17 +391,19 @@ def BB2Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
        
     for n in B2_bunches_index:
     
+    
+        # First check for collisions in ALICE
 
         # Formula for head on collision in ALICE is 
         # (n - 891) mod 3564 = m
         # where n is number of bunch in B2, and m is number of bunch in B1
         
-        # Formula for head on collision in ATLAS/CMS is  
+        # Formula for head on collision in ATLAS/CMS is 
         # n = m
         # where n is number of bunch in B2, and m is number of bunch in B1
         
-        # Formula for head on collision in ALICE is 
-        # (n - 891) mod 3564 = m
+        # Formula for head on collision in LHCb is 
+        # (n - 2670) mod 3564 = m
         # where n is number of bunch in B2, and m is number of bunch in B1
 
         head_on_names = ["headOnALICE", "headOnATLAS/CMS", "headOnLHCB"]
@@ -377,21 +425,65 @@ def BB2Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
             collide_factor = colide_factor_list[i]
             m = (n - collide_factor) % number_of_bunches
             
+            #pdb.set_trace()
             # if this Bunch is true, than there is head on collision
             if B1_bunches[m]:
                 head_on = m
             else:
                 head_on = None
             
-            # Check does beam 2 have bunches in range  m - numberOfLRToConsider to m + numberOfLRToConsider 
-            # In this range some interaction happens
-            bunches_ineraction_temp = np.where(B1_bunches[(m - numberOfLRToConsider[i]):(m + numberOfLRToConsider[i] + 1)])[0]
+            ## Check if beam 2 has bunches in range  m - numberOfLRToConsider to m + numberOfLRToConsider 
+            ## Also have to check if bunches wrap around from 3563 to 0 or vice versa
+            
+            
+            bunches_ineraction_temp = np.array([])
+            encounters = np.array([])
+            positions = np.array([])
+            
+            first_to_consider = m - numberOfLRToConsider[i]
+            last_to_consider = m + numberOfLRToConsider[i] + 1
 
+            if n == 891 and i == 2:
+                pdb.set_trace()
+                
+            if first_to_consider < 0:
+                bunches_ineraction_partial = np.where(B1_bunches[(number_of_bunches + first_to_consider):(number_of_bunches)])[0]
+                #bunches_ineraction_temp = np.append(bunches_ineraction_temp, bunches_ineraction_partial)
+                
+                # This represents the absolute position of the bunches 
+                encounters = np.append(encounters, number_of_bunches + first_to_consider + bunches_ineraction_partial )
+                
+                #This represents the relative position to the head-on bunch
+                positions = np.append(positions, first_to_consider + bunches_ineraction_partial)
+                
+                #Set this varibale so later the normal syntax wihtout the wrap around checking can be used
+                first_to_consider = 0
+                
+            if last_to_consider > number_of_bunches:
+                bunches_ineraction_partial = np.where(B1_bunches[0:last_to_consider - number_of_bunches])[0]
+                #bunches_ineraction_temp = np.append(bunches_ineraction_temp, bunches_ineraction_partial)
+                
+                # This represents the absolute position of the bunches 
+                encounters = np.append(encounters, bunches_ineraction_partial )
+                
+                #This represents the relative position to the head-on bunch
+                positions = np.append(positions, number_of_bunches - m + bunches_ineraction_partial)
+                
+                
+                last_to_consider = number_of_bunches
+            
+            bunches_ineraction_partial = np.append(bunches_ineraction_temp, np.where(B1_bunches[first_to_consider:last_to_consider])[0])
+            
+            # This represents the absolute position of the bunches 
+            encounters = np.append(encounters, first_to_consider + bunches_ineraction_partial)
+            
+            #This represents the relative position to the head-on bunch
+            positions = np.append(positions, bunches_ineraction_partial - (m - first_to_consider))
+            
+            
             # Substract head on collision from number of secondary collisions
             numb_of_secondary_coll = len(bunches_ineraction_temp) - int(B1_bunches[m])
 
-            encounters = m - numberOfLRToConsider[0] + bunches_ineraction_temp
-            positions = -numberOfLRToConsider[0] + bunches_ineraction_temp
             
             dictonary.update({head_on_names[i] : { n : head_on }, secondary_names[i] : { n : numb_of_secondary_coll }, \
                              encounters_names[i] : { n : encounters },  positions_names[i] : { n : positions } })
@@ -401,7 +493,7 @@ def BB2Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
 
     return B2df
 
-def genericFillingPatern(booleanList, flagChars = ['e', 'f']):
+def _BeamFilling2str(booleanList, flagChars = ['e', 'f']):
     '''
     
     For a given boolean list, this function returns a string which represents the counting operation of boolean values. For example
@@ -445,15 +537,23 @@ def genericFillingPatern(booleanList, flagChars = ['e', 'f']):
             
     return result
 
-def bunchFillingPatern (bunchFilling, flagChars = ['e', 'f']):
+def BeamFilling2str (bunchFilling, flagChars = ['e', 'f']):
     
     '''
     
-    Simple function that addapts the genericFillingPatern for use in the cals2pd package
+    Simple function that addapts the _BeamFilling2str for use in the cals2pd package
+    
+    Text from _BeamFilling2str:    
+    For a given boolean list, this function returns a string which represents the counting operation of boolean values. For example
+    booleanList = [False, False, True, False, False, False] would return "2e1f3e"
+    Character flags that represent true or false can be edited with flagChars variable
+    
+    f - full ~ True
+    e - empty ~ False
     
     ===EXAMPLE===
     fillingSchemeDF=importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],6666, ['FLATTOP'],flag='next')
-    bunchFillingPatern(fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0])
+    _BeamFilling2str(fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0])
         
     '''
     
