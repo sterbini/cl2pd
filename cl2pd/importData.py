@@ -845,7 +845,7 @@ def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=
         else:
             return pd.concat(listDF).sort_index()
 
-def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, functionList = None, flag = None, offset = None, duration = None):
+def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, functionList = None, mapInsteadAgg = False, flag = None, offset = None, duration = None):
     '''
     
     For the selected fill numbers, beam modes and list of variables, this function creates 
@@ -865,6 +865,7 @@ def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, function
     LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'])
     LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'], [pd.Series.mean, pd.Series.max], 'last')
     LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), 'PRERAMP', pd.Series.max, 'last')
+    LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_INTENSITY'],6666, ['FLATTOP'],flag='duration',duration=pd.Timedelta('1m'), functionList = np.mean, mapInsteadAgg = True)
     
     '''
     # FOR DEBUGGING 
@@ -921,30 +922,38 @@ def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, function
     #duration
     if duration == None:
         duration = defaultDuration
-                       
-    NoOfVar = len(listOfVariables)
+                  
     NoOfFills = len(fillNos)
     NoOfModes = len(beamModeList)
     
     resultDF = pd.DataFrame()
     data = LHCCals2pd(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
-        
+    
+    # In case of regex variables, number of variables have to be counted this way 
+    listOfVariables = data.columns.drop('fill').drop('mode')
+    NoOfVar = len(listOfVariables)
+    
+    NoOfFunctions = len(functionList)
+    # This flag is set to 1 if we have a list of functions, it is reset to 0 if it only has one function
+    functionFlag = 1
+    if NoOfFunctions == 1:
+        functionFlag = 0
+    elif NoOfFunctions != NoOfVar:
+        raise AttributeError("Number of functions not the same size as number of variables.")
+
+    
     # Special interactions with the function list
     if functionList == None:
         # No need to do anything to the data expect multindex it so the output is always multi-indexed
         resultDF = data.set_index(['fill', 'mode'])
-    else:    
+    
+    elif mapInsteadAgg:
+        # Apply function on each field
+        resultDF = data.set_index(['fill', 'mode'])
+        for i in range(0, NoOfVar):
+            resultDF[listOfVariables[i]] = resultDF[listOfVariables[i]].map(functionList[i * functionFlag])
         
-        NoOfFunctions = len(functionList)
-
-        # This flag is set to 1 if we have a list of functions, it is reset to 0 if it only has one function
-        functionFlag = 1
-        if NoOfFunctions == 1:
-            functionFlag = 0
-        elif NoOfFunctions != NoOfVar:
-            raise AttributeError("Number of functions not the same size as number of variables.")
-
-
+    else:    
         grupedData = data.groupby(['fill', 'mode'])
         for i in range(0, NoOfVar):
             resultDF[listOfVariables[i]] = grupedData[listOfVariables[i]].agg(functionList[i * functionFlag])
