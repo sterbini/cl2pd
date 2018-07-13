@@ -1,5 +1,6 @@
 import numpy as np 
 import dotdict
+import pandas as pd
 dotdict=dotdict.dotdict
 
 
@@ -223,3 +224,179 @@ def BBEncounterSchedule(B1_fillingScheme,B2_fillingScheme,BBMatrixLHC):
 
     beam_BB_pattern=dotdict({'atB1':B1_BB_pattern,'atB2':B2_BB_pattern})
     return beam_BB_pattern
+
+def BB1Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
+    
+    '''
+    For given two series of booleans which represent bunches and a array that represent long range collisions, 
+    this function returns dataframe related to their collisions from perspective of beam 1.
+    
+    ===EXAMPLE===
+    fillingSchemeDF=importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],6666, ['FLATTOP'],flag='next')
+    B1_bunches_real = np.array(fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0])
+    B1_bunches_real = B1_bunches_real == 1.0
+
+    B2_bunches_real = np.array(fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].iloc[0])
+    B2_bunches_real = B2_bunches_real == 1.0
+    BB1Collision(B1_bunches_real, B2_bunches_real, 25)
+    
+    '''
+    
+    # For debugging
+    # pdb.set_trace()
+    
+    # Get indexes of Bunches
+    B1_bunches_index = np.where(B1_bunches)[0]
+    B2_bunches_index = np.where(B2_bunches)[0]
+    
+    if isinstance(numberOfLRToConsider, (int, long)):
+        numberOfLRToConsider = [numberOfLRToConsider, numberOfLRToConsider, numberOfLRToConsider]
+    
+    B1df = pd.DataFrame() 
+       
+    for n in B1_bunches_index:
+    
+    
+        # First check for collisions in ALICE
+
+        # Formula for head on collision in ALICE is 
+        # (n + 891) mod 3564 = m
+        # where n is number of bunch in B1, and m is number of bunch in B2
+        
+        # Formula for head on collision in ATLAS/CMS is 
+        # n = m
+        # where n is number of bunch in B1, and m is number of bunch in B2
+        
+        # Formula for head on collision in LHCb is 
+        # (n + 2670) mod 3564 = m
+        # where n is number of bunch in B1, and m is number of bunch in B2
+
+        head_on_names = ["headOnALICE", "headOnATLAS/CMS", "headOnLHCB"]
+        secondary_names = ["secondaryCollisionALICE", "secondaryCollisionATLAS/CMS", "secondaryCollisionLHCB"]
+        encounters_names = ["encountersALICE", "encountersATLAS/CMS", "encountersLHCB"]
+        positions_names = ["positionsALICE", "positionsATLAS/CMS", "positionsLHCB"]
+        
+        colide_factor_list = [891, 0, 2670]
+        number_of_bunches = 3564
+        
+        # i == 0 for ALICE
+        # i == 1 for ATLAS and CMS
+        # i == 2 for LHCB
+        
+        dictonary = {}
+        
+        for i in range(0,3):
+        
+            collide_factor = colide_factor_list[i]
+            m = (n + collide_factor) % number_of_bunches
+            
+            # if this Bunch is true, than there is head on collision
+            if B2_bunches[m]:
+                head_on = m
+            else:
+                head_on = None
+            
+            # Check does beam 2 have bunches in range  m - numberOfLRToConsider to m + numberOfLRToConsider 
+            # In this range some interaction happens
+            bunches_ineraction_temp = np.where(B2_bunches[(m - numberOfLRToConsider[i]):(m + numberOfLRToConsider[i] + 1)])[0]
+
+            # Substract head on collision from number of secondary collisions
+            numb_of_secondary_coll = len(bunches_ineraction_temp) - int(B1_bunches[m])
+
+            encounters = m - numberOfLRToConsider[0] + bunches_ineraction_temp
+            positions = -numberOfLRToConsider[0] + bunches_ineraction_temp
+            
+            dictonary.update({head_on_names[i] : { n : head_on }, secondary_names[i] : { n : numb_of_secondary_coll }, \
+                             encounters_names[i] : { n : encounters },  positions_names[i] : { n : positions } })
+
+        B1df = B1df.append(pd.DataFrame(dictonary))
+
+
+    return B1df
+
+def BB2Collision (B1_bunches, B2_bunches, numberOfLRToConsider):
+    
+    '''
+    For given two series of booleans which represent bunches and a array that represent long range collisions, 
+    this function returns dataframe related to their collisions from perspective of beam 2.
+    
+    ===EXAMPLE===
+    fillingSchemeDF=importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],6666, ['FLATTOP'],flag='next')
+    B1_bunches_real = np.array(fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0])
+    B1_bunches_real = B1_bunches_real == 1.0
+
+    B2_bunches_real = np.array(fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].iloc[0])
+    B2_bunches_real = B2_bunches_real == 1.0
+    BB2Collision(B1_bunches_real, B2_bunches_real, 25)
+    
+    '''
+    
+    # For debugging
+    # pdb.set_trace()
+    
+    # Get indexes of Bunches
+    B1_bunches_index = np.where(B1_bunches)[0]
+    B2_bunches_index = np.where(B1_bunches)[0]
+    
+    if isinstance(numberOfLRToConsider, (int, long)):
+        numberOfLRToConsider = [numberOfLRToConsider, numberOfLRToConsider, numberOfLRToConsider]
+    
+    B2df = pd.DataFrame() 
+       
+    for n in B2_bunches_index:
+    
+
+        # Formula for head on collision in ALICE is 
+        # (n - 891) mod 3564 = m
+        # where n is number of bunch in B2, and m is number of bunch in B1
+        
+        # Formula for head on collision in ATLAS/CMS is  
+        # n = m
+        # where n is number of bunch in B2, and m is number of bunch in B1
+        
+        # Formula for head on collision in ALICE is 
+        # (n - 891) mod 3564 = m
+        # where n is number of bunch in B2, and m is number of bunch in B1
+
+        head_on_names = ["headOnALICE", "headOnATLAS/CMS", "headOnLHCB"]
+        secondary_names = ["secondaryCollisionALICE", "secondaryCollisionATLAS/CMS", "secondaryCollisionLHCB"]
+        encounters_names = ["encountersALICE", "encountersATLAS/CMS", "encountersLHCB"]
+        positions_names = ["positionsALICE", "positionsATLAS/CMS", "positionsLHCB"]
+        
+        colide_factor_list = [891, 0, 2670]
+        number_of_bunches = 3564
+        
+        # i == 0 for ALICE
+        # i == 1 for ATLAS and CMS
+        # i == 2 for LHCB
+        
+        dictonary = {}
+        
+        for i in range(0,3):
+        
+            collide_factor = colide_factor_list[i]
+            m = (n - collide_factor) % number_of_bunches
+            
+            # if this Bunch is true, than there is head on collision
+            if B1_bunches[m]:
+                head_on = m
+            else:
+                head_on = None
+            
+            # Check does beam 2 have bunches in range  m - numberOfLRToConsider to m + numberOfLRToConsider 
+            # In this range some interaction happens
+            bunches_ineraction_temp = np.where(B1_bunches[(m - numberOfLRToConsider[i]):(m + numberOfLRToConsider[i] + 1)])[0]
+
+            # Substract head on collision from number of secondary collisions
+            numb_of_secondary_coll = len(bunches_ineraction_temp) - int(B1_bunches[m])
+
+            encounters = m - numberOfLRToConsider[0] + bunches_ineraction_temp
+            positions = -numberOfLRToConsider[0] + bunches_ineraction_temp
+            
+            dictonary.update({head_on_names[i] : { n : head_on }, secondary_names[i] : { n : numb_of_secondary_coll }, \
+                             encounters_names[i] : { n : encounters },  positions_names[i] : { n : positions } })
+
+        B2df = B2df.append(pd.DataFrame(dictonary))
+
+
+    return B2df
