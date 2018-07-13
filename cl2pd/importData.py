@@ -933,31 +933,30 @@ def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, function
     listOfVariables = data.columns.drop('fill').drop('mode')
     NoOfVar = len(listOfVariables)
     
-    NoOfFunctions = len(functionList)
-    # This flag is set to 1 if we have a list of functions, it is reset to 0 if it only has one function
-    functionFlag = 1
-    if NoOfFunctions == 1:
-        functionFlag = 0
-    elif NoOfFunctions != NoOfVar:
-        raise AttributeError("Number of functions not the same size as number of variables.")
-
-    
     # Special interactions with the function list
     if functionList == None:
         # No need to do anything to the data expect multindex it so the output is always multi-indexed
         resultDF = data.set_index(['fill', 'mode'])
     
-    elif mapInsteadAgg:
-        # Apply function on each field
-        resultDF = data.set_index(['fill', 'mode'])
-        for i in range(0, NoOfVar):
-            resultDF[listOfVariables[i]] = resultDF[listOfVariables[i]].map(functionList[i * functionFlag])
-        
-    else:    
-        grupedData = data.groupby(['fill', 'mode'])
-        for i in range(0, NoOfVar):
-            resultDF[listOfVariables[i]] = grupedData[listOfVariables[i]].agg(functionList[i * functionFlag])
+    else:
+        NoOfFunctions = len(functionList)
+        # This flag is set to 1 if we have a list of functions, it is reset to 0 if it only has one function
+        functionFlag = 1
+        if NoOfFunctions == 1:
+            functionFlag = 0
+        elif NoOfFunctions != NoOfVar:
+            raise AttributeError("Number of functions not the same size as number of variables.")
+            
+        if mapInsteadAgg:
+            # Apply function on each field
+            resultDF = data.set_index(['fill', 'mode'])
+            for i in range(0, NoOfVar):
+                resultDF[listOfVariables[i]] = resultDF[listOfVariables[i]].map(functionList[i * functionFlag])
 
+        else:    
+            grupedData = data.groupby(['fill', 'mode'])
+            for i in range(0, NoOfVar):
+                resultDF[listOfVariables[i]] = grupedData[listOfVariables[i]].agg(functionList[i * functionFlag])
         
     #Fetching of the time data
     timeData = LHCFillsByNumber(fillNos)
