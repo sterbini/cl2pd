@@ -1002,7 +1002,7 @@ def LHCFillsMappingAggregation (listOfVariables, fillNos, beamModeList = None, m
     # ('offset', Timedelta('0 days 00:00:00')),
     # ('duration', Timedelta('0 days 00:00:05'))]
     
-    a = inspect.getargspec(importData.LHCCals2pd)
+    a = inspect.getargspec(LHCCals2pd)
     defaultValues = zip(a.args[-len(a.defaults):],a.defaults)
     
     defaultBeamModeList = defaultValues[0][1]
@@ -1049,7 +1049,7 @@ def LHCFillsMappingAggregation (listOfVariables, fillNos, beamModeList = None, m
     NoOfModes = len(beamModeList)
     
     resultDF = pd.DataFrame()
-    data = importData.LHCCals2pd(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
+    data = LHCCals2pd(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
     
     # In case of regex variables, number of variables have to be counted this way 
     listOfVariables = data.columns.drop('fill').drop('mode')
@@ -1088,7 +1088,7 @@ def LHCFillsMappingAggregation (listOfVariables, fillNos, beamModeList = None, m
 
         
     #Fetching of the time data
-    timeData = importData.LHCFillsByNumber(fillNos)
+    timeData = LHCFillsByNumber(fillNos)
     timeData['fill'] = timeData.index
     timeData = timeData.set_index(['fill', 'mode'])            
 
