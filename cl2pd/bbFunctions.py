@@ -486,14 +486,14 @@ def B2CollisionScheduleDF (B1_bunches, B2_bunches, numberOfLRToConsider):
 
     return B2df
 
-def _BeamFilling2str(booleanList, flagChars = ['e', 'f']):
+def _BeamFilling2str(booleanList, flagChars = ['e', 'b']):
     '''
     
     For a given boolean list, this function returns a string which represents the counting operation of boolean values. For example
-    booleanList = [False, False, True, False, False, False] would return "2e1f3e"
+    booleanList = [False, False, True, False, False, False] would return "2e1b3e"
     Character flags that represent true or false can be edited with flagChars variable
     
-    f - full ~ True
+    b - bunch ~ True
     e - empty ~ False
     
     ===EXAMPLE===
@@ -530,7 +530,7 @@ def _BeamFilling2str(booleanList, flagChars = ['e', 'f']):
             
     return result
 
-def BeamFilling2str (bunchFilling, flagChars = ['e', 'f']):
+def BeamFilling2str (bunchFilling, flagChars = ['e', 'b']):
     
     '''
     
@@ -538,10 +538,10 @@ def BeamFilling2str (bunchFilling, flagChars = ['e', 'f']):
     
     Text from _BeamFilling2str:    
     For a given boolean list, this function returns a string which represents the counting operation of boolean values. For example
-    booleanList = [False, False, True, False, False, False] would return "2e1f3e"
+    booleanList = [False, False, True, False, False, False] would return "2e1b3e"
     Character flags that represent true or false can be edited with flagChars variable
     
-    f - full ~ True
+    b - bunch ~ True
     e - empty ~ False
     
     ===EXAMPLE===
