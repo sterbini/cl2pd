@@ -631,7 +631,7 @@ def tfs2pd(myList):
     else:
         return _tfs2pd(myList)
     
-def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False):
+def _LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False):
     '''
     LHCCals2pd(listOfVariables, fillList, beamModeList='FILL', split=1, verbose=False)
 
@@ -681,6 +681,8 @@ def LHCInstant(t1,timeSpan_days=1):
     ===Example===   
     t1 = pd.Timestamp('2018-05-22 02:10:15', tz='CET')
     importData.LHCInstant(t1)
+    # Retrive some of the last fill
+    importData.LHCInstant(pd.Timestamp.now('CET')-pd.Timedelta('1d') )
     '''
     if t1.tz==None: t1.tz_localize('UTC')
     else: t1=t1.astimezone('UTC')
@@ -741,10 +743,10 @@ def _LHCCals2pd_ver1(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
     else:
         return pd.concat(listDF).sort_index()
     
-def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
+def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
                      fill_column=False, beamMode_column=False, flag='', offset=pd.Timedelta(0), duration=pd.Timedelta('5s')):
     '''
-    _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
+    LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
                      fill_column=False, beamMode_column=False, flag='', offset=pd.Timedelta(0), duration=pd.Timedelta('5s')
     Return the listOfVariables in the fill of the fillList for a given list of beamModeList. 
     It can be used in the verbose mode if the corresponding flag is True.
@@ -757,11 +759,11 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
     The default value of duration is pd.Timedelta('5s')
     
     ===Example===     
-    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666],['RAMP','FLATTOP'])
+    importData.LHCCals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666],['RAMP','FLATTOP'])
     
-    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='duration',fill_column=True, beamMode_column=True, offset=pd.Timedelta('5s'),duration=pd.Timedelta('60s'))
+    importData.LHCCals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='duration',fill_column=True, beamMode_column=True, offset=pd.Timedelta('5s'),duration=pd.Timedelta('60s'))
     
-    importData._LHCCals2pd_ver2(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='next',fill_column=True, beamMode_column=True,fill_column=True, beamMode_column=True,)
+    importData.LHCCals2pd(['RPHFC.UL14.RQX.L1:I_MEAS'],[6278, 6666,6690],['RAMP','FLATTOP'],flag='next',fill_column=True, beamMode_column=True,fill_column=True, beamMode_column=True,)
     '''
     if len(listOfVariables)==0:
         return pd.DataFrame()
@@ -843,7 +845,7 @@ def _LHCCals2pd_ver2(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
         else:
             return pd.concat(listDF).sort_index()
 
-def LHCFillsVarsModes2pd (listOfVariables, fillNos, beamModeList = None, functionList = None, flag = None, offset = None, duration = None):
+def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, functionList = None, mapInsteadAgg = False, flag = None, offset = None, duration = None):
     '''
     
     For the selected fill numbers, beam modes and list of variables, this function creates 
@@ -859,10 +861,11 @@ def LHCFillsVarsModes2pd (listOfVariables, fillNos, beamModeList = None, functio
     If some of these parameters are not set, the default ones from the function _LHCCals2pd_ver2 are used.
     
     ===EXAMPLE===
-    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800))
-    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'])
-    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'], [pd.Series.mean, pd.Series.max], 'last')
-    LHCFillsVarsModes2pd(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), 'PRERAMP', pd.Series.max, 'last')
+    LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800))
+    LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'])
+    LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), ['INJPHYS','INJPROT'], [pd.Series.mean, pd.Series.max], 'last')
+    LHCFillsAggregation(['LHC.BQM.B2:NO_BUNCHES', 'LHC.BQM.B1:NO_BUNCHES'], range(6500, 6800), 'PRERAMP', pd.Series.max, 'last')
+    LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_INTENSITY'],6666, ['FLATTOP'],flag='duration',duration=pd.Timedelta('1m'), functionList = np.mean, mapInsteadAgg = True)
     
     '''
     # FOR DEBUGGING 
@@ -881,7 +884,7 @@ def LHCFillsVarsModes2pd (listOfVariables, fillNos, beamModeList = None, functio
     # ('offset', Timedelta('0 days 00:00:00')),
     # ('duration', Timedelta('0 days 00:00:05'))]
     
-    a = inspect.getargspec(_LHCCals2pd_ver2)
+    a = inspect.getargspec(LHCCals2pd)
     defaultValues = zip(a.args[-len(a.defaults):],a.defaults)
     
     defaultBeamModeList = defaultValues[0][1]
@@ -919,37 +922,173 @@ def LHCFillsVarsModes2pd (listOfVariables, fillNos, beamModeList = None, functio
     #duration
     if duration == None:
         duration = defaultDuration
-                       
-    NoOfVar = len(listOfVariables)
+                  
     NoOfFills = len(fillNos)
     NoOfModes = len(beamModeList)
     
     resultDF = pd.DataFrame()
-    data = _LHCCals2pd_ver2(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
-        
+    data = LHCCals2pd(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
+    
+    # In case of regex variables, number of variables have to be counted this way 
+    listOfVariables = data.columns.drop('fill').drop('mode')
+    NoOfVar = len(listOfVariables)
+    
     # Special interactions with the function list
     if functionList == None:
-        # No need to do anything to the data excpet multindex it so the output is always multiindexed
+        # No need to do anything to the data expect multindex it so the output is always multi-indexed
         resultDF = data.set_index(['fill', 'mode'])
-    else:    
-        
+    
+    else:
         NoOfFunctions = len(functionList)
-
         # This flag is set to 1 if we have a list of functions, it is reset to 0 if it only has one function
         functionFlag = 1
         if NoOfFunctions == 1:
             functionFlag = 0
         elif NoOfFunctions != NoOfVar:
             raise AttributeError("Number of functions not the same size as number of variables.")
+            
+        if mapInsteadAgg:
+            # Apply function on each field
+            resultDF = data.set_index(['fill', 'mode'])
+            for i in range(0, NoOfVar):
+                resultDF[listOfVariables[i]] = resultDF[listOfVariables[i]].map(functionList[i * functionFlag])
 
-
-        grupedData = data.groupby(['fill', 'mode'])
-        for i in range(0, NoOfVar):
-            resultDF[listOfVariables[i]] = grupedData[listOfVariables[i]].agg(functionList[i * functionFlag])
-
+        else:    
+            grupedData = data.groupby(['fill', 'mode'])
+            for i in range(0, NoOfVar):
+                resultDF[listOfVariables[i]] = grupedData[listOfVariables[i]].agg(functionList[i * functionFlag])
         
     #Fetching of the time data
     timeData = LHCFillsByNumber(fillNos)
+    timeData['fill'] = timeData.index
+    timeData = timeData.set_index(['fill', 'mode'])            
+
+    return resultDF.join(timeData)
+
+def LHCFillsMappingAggregation (listOfVariables, fillNos, beamModeList = None, mapFunctionList = [], aggFunctionList = [], flag = None, offset = None, duration = None):
+    '''
+    
+    For the selected fill numbers, beam modes and list of variables, this function creates 
+    a list for each variable on which it applies the coresponding function. The result is 
+    returned as output. If function is set to None, than no processing of the data is done.
+    If one function is set as input, that one function is applied to all of the variables. 
+    If number of functions must is the same as the number of variables, each variable is 
+    processed by the coresponding function.
+    
+    It is possible to add an offset. This will offset the the startTime and endTime.
+    If flag is 'next' or 'last', the next or last  measurement after or before the startTime (+offset) will be returned.
+    if flag is 'duration' the extraction will be between [t1,t2], with t1=(startTime+offset) and t2=(startTime+offset+duration).
+    If some of these parameters are not set, the default ones from the function _LHCCals2pd_ver2 are used.
+    
+    ===EXAMPLE===
+    importData.LHCFillsMappingAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_INTENSITY'],6666, ['FLATTOP'],flag='duration',duration=pd.Timedelta('1m'), aggFunctionList = np.mean, mapFunctionList = np.mean)
+    importData.LHCFillsMappingAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_INTENSITY'],6666, ['FLATTOP'], aggFunctionList = np.mean, mapFunctionList = np.mean)
+    importData.LHCFillsMappingAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],6666, ['FLATTOP'], mapFunctionList = np.mean)
+    
+    '''
+    # FOR DEBUGGING 
+    # import pdb
+    # pdb.set_trace()
+    
+    # Fetching the default values from the _LHCCals2pd_ver2 function.
+    # Doing it like this so in case the default values change, you don't have to modify the function
+    # Current look of default values
+    # [('beamModeList', 'FILL'),
+    # ('split', 1),
+    # ('verbose', False),
+    # ('fill_column', False),
+    # ('beamMode_column', False),
+    # ('flag', ''),
+    # ('offset', Timedelta('0 days 00:00:00')),
+    # ('duration', Timedelta('0 days 00:00:05'))]
+    
+    a = inspect.getargspec(importData.LHCCals2pd)
+    defaultValues = zip(a.args[-len(a.defaults):],a.defaults)
+    
+    defaultBeamModeList = defaultValues[0][1]
+    defaultFlag = defaultValues[5][1]
+    defaultOffset = defaultValues[6][1]
+    defaultDuration = defaultValues[7][1]
+    
+    ## PROCESSING OF THE INPUT VARIABLES
+    
+    #listOfVariables
+    if isinstance(listOfVariables, str):
+        listOfVariables = [listOfVariables]
+    
+    #fillNos
+    if isinstance(fillNos, (int, long)):
+        fillNos = [fillNos]
+        # This is done so that the for loop can work properly
+        
+    #beamModeList
+    if beamModeList == None:
+        beamModeList = defaultBeamModeList        
+                
+    #aggFunctionList
+    if callable(aggFunctionList):
+        aggFunctionList = [aggFunctionList]
+        
+    #mapFunctionList
+    if callable(mapFunctionList):
+        mapFunctionList = [mapFunctionList]
+        
+    #flag
+    if flag == None:
+        flag = defaultFlag
+    
+    #offset
+    if offset == None:
+        offset = defaultOffset
+    
+    #duration
+    if duration == None:
+        duration = defaultDuration
+                  
+    NoOfFills = len(fillNos)
+    NoOfModes = len(beamModeList)
+    
+    resultDF = pd.DataFrame()
+    data = importData.LHCCals2pd(listOfVariables, fillNos, beamModeList, fill_column=True, beamMode_column=True, flag = flag, offset = offset, duration = duration)
+    
+    # In case of regex variables, number of variables have to be counted this way 
+    listOfVariables = data.columns.drop('fill').drop('mode')
+    NoOfVar = len(listOfVariables)    
+    
+    NoOfAggFunctions = len(aggFunctionList)
+    NoOfMapFunctions = len(mapFunctionList)
+    # This flag is set to 1 if we have a list of functions, it is reset to 0 if it only has one function
+    aggFunctionFlag = 1
+    mapFunctionFlag = 1
+
+    # Number of functions must be the same as number of variables
+    if NoOfAggFunctions == 1 or NoOfAggFunctions == 0:
+        aggFunctionFlag = 0
+    elif NoOfAggFunctions != NoOfVar:
+        raise AttributeError("Number of aggregate functions not the same size as number of variables or equal to 1.")
+
+    if NoOfMapFunctions == 1 or NoOfMapFunctions == 0:
+        mapFunctionFlag = 0
+    elif NoOfMapFunctions != NoOfVar:
+        raise AttributeError("Number of maping functions not the same size as number of variables or equal to 1.")
+
+    resultDF = data.set_index(['fill', 'mode'])
+
+    if NoOfMapFunctions != 0:
+        # Apply function on each field            
+        for i in range(0, NoOfVar):
+            resultDF[listOfVariables[i]] = resultDF[listOfVariables[i]].map(mapFunctionList[i * mapFunctionFlag])
+
+    if NoOfAggFunctions != 0:
+        temp_resultDF = pd.DataFrame()
+        grupedData = resultDF.groupby(['fill', 'mode'])
+        for i in range(0, NoOfVar):
+            temp_resultDF[listOfVariables[i]] = grupedData[listOfVariables[i]].agg(aggFunctionList[i * aggFunctionFlag])
+        resultDF = temp_resultDF
+
+        
+    #Fetching of the time data
+    timeData = importData.LHCFillsByNumber(fillNos)
     timeData['fill'] = timeData.index
     timeData = timeData.set_index(['fill', 'mode'])            
 
