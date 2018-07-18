@@ -1218,7 +1218,6 @@ def LHCFillsMappingAggregation_v2 (listOfVariables, fillNos, beamModeList = None
     return resultDF.reset_index().set_index('fill')
 
  def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
-
     '''
     For a given fill number, this function constructs its injection tree. Treshold number might have to be adjusted.
     It represents the smallest jump in beam intensity that is the result of the injections.
