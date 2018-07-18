@@ -5,6 +5,7 @@ import inspect
 # Fundamental contribution by R. De Maria et al.
 import pytimber
 import dotdict
+dotdict=dotdict.dotdict
 
 # TODO: discuss about the possible problem if the user has already defined a variable named 'cals' 
 cals=pytimber.LoggingDB()
