@@ -1227,10 +1227,15 @@ def LHCInjectionTree (fill_no, threshold = 1.0e+11):
     ===EXAMPLE===
     tree = importData.LHCInjectionTree(6666)
     
-    for SPS in tree.beam1.SPS:
-        for PS in SPS.PS:
-            for PSB in PS.PSB:
-                print PSB.time
+    
+    for SPS, i in zip(tree.beam1.SPS, range(len(tree.beam1.SPS))):
+        print('SPS '+str(i) + ': '+ str(SPS.time))
+        for PS, j in zip(SPS.PS, range(len(SPS.PS))):
+            print('\tPS '+str(i) + '.' + str(j) +': '+ str(PS.time))    
+            for PSB, k in zip(PS.PSB, range(len(PS.PSB))):
+                print('\t\tPSB '+str(i) + '.' + str(j) +'.'+str(k)+': '+ str(PSB.time))
+                
+    importData.cycleStamp2pd(['CPS.LSA:CYCLE'],[pd.Timestamp('2018-05-10 20:04:52.300000+00:00')])
     '''
     # Global parameters
     beam_mode = 'INJPHYS'
