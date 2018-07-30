@@ -195,6 +195,11 @@ def BBEncounterSchedule(B1_fillingScheme,B2_fillingScheme,BBMatrixLHC):
     B1_bunches=np.array([0,1,2])
     B2_bunches=np.array([0,1,2])
     results=beam_BB_pattern(B1_bunches, B2_bunches, BBMatrixLHC)
+    #or more realistically
+    fillingSchemeDF=importData.LHCCals2pd(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'],6972, ['FLATTOP'],flag='next')
+    B1_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].iloc[0]
+    B2_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].iloc[0]
+    results=bbFunctions.BBEncounterSchedule(np.where(B1_bunches)[0], np.where(B2_bunches)[0], BBMatrixLHC)
     """
     experiments=['atALICE','atATLAS','atCMS','atLHCB']
 
