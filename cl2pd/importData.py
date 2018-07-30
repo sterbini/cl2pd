@@ -1219,17 +1219,18 @@ def LHCFillsMappingAggregation_v2 (listOfVariables, fillNos, beamModeList = None
 
     return resultDF.reset_index().set_index('fill')
 
-def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
+def LHCInjectionTree (fill_no, threshold = 1.0e+11):
     '''
     For a given fill number, this function constructs its injection tree. Treshold number might have to be adjusted.
     It represents the smallest jump in beam intensity that is the result of the injections.
     
     ===EXAMPLE===
-    tree = importData.injectionTree(6666)
+    tree = importData.LHCInjectionTree(6666)
     
-    for SPS_inj in tree.beam1.SPS_injections:
-        for PS_inj in SPS_inj.PS_injections:
-            print len(PS_inj.PSB_injections)
+    for SPS in tree.beam1.SPS:
+        for PS in SPS.PS:
+            for PSB in PS.PSB:
+                print PSB.time
     '''
     # Global parameters
     beam_mode = 'INJPHYS'
@@ -1282,8 +1283,8 @@ def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
     diff2DF = diff2DF.dropna()
 
     # In the end, all maxima that are lower than some treshold are discarded
-    only_max_b1 = diff1DF[diff1DF[beam1_var] > treshhold]
-    only_max_b2 = diff2DF[diff2DF[beam2_var] > treshhold]
+    only_max_b1 = diff1DF[diff1DF[beam1_var] > threshold]
+    only_max_b2 = diff2DF[diff2DF[beam2_var] > threshold]
 
     # To get exact moments of injections, it is required to get all of the injection data
     injection_data = LHCCals2pd(all_injection_vars, fill_no, beam_mode)
@@ -1314,7 +1315,7 @@ def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
         t_sps = sps_injections_b1.index[i]
         sps1_injections_dict = dotdict({"time":t_sps})
 
-        ps_injections = psDF[(psDF.index > t_sps - ps_t_begin) & (psDF.index < t_sps + ps_t_end)]
+        ps_injections = psDF[(psDF.index >= t_sps - ps_t_begin) & (psDF.index <= t_sps + ps_t_end)]
 
         ps_list = []
         for j in range(0, len(ps_injections.index)):
@@ -1322,7 +1323,7 @@ def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
             t_ps = ps_injections.index[j]
             ps_injections_dict = dotdict({"time":t_ps, "batch" : ps_injections[cps_batch_var][j]})
 
-            psb_injections = psbDF[(psbDF.index > t_ps - psb_t_begin) & (psbDF.index < t_ps + psb_t_end)]
+            psb_injections = psbDF[(psbDF.index >= t_ps - psb_t_begin) & (psbDF.index <= t_ps + psb_t_end)]
             psb_list = []
 
             for k in range(0, len(psb_injections.index)):
@@ -1330,13 +1331,13 @@ def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
                 psb_injections_dict = dotdict({"time":t_psb})
                 psb_list.append(psb_injections_dict)
 
-            ps_injections_dict.update(dotdict({"PSB_injections" : psb_list}))
+            ps_injections_dict.update(dotdict({"PSB" : psb_list}))
             ps_list.append(ps_injections_dict)
 
-        sps1_injections_dict.update({"PS_injections": ps_list})
+        sps1_injections_dict.update({"PS": ps_list})
         sps1_list.append(sps1_injections_dict)
 
-    tree["beam1"] = dotdict({"SPS_injections":sps1_list})
+    tree["beam1"] = dotdict({"SPS":sps1_list})
 
 
     for i in range(0, len(sps_injections_b2.index)):
@@ -1345,7 +1346,7 @@ def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
         t_sps = sps_injections_b2.index[i]
         sps2_injections_dict = dotdict({"time":t_sps})
 
-        ps_injections = psDF[(psDF.index > t_sps - ps_t_begin) & (psDF.index < t_sps + ps_t_end)]
+        ps_injections = psDF[(psDF.index >= t_sps - ps_t_begin) & (psDF.index <= t_sps + ps_t_end)]
 
         ps_list = []
         for j in range(0, len(ps_injections.index)):
@@ -1353,7 +1354,7 @@ def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
             t_ps = ps_injections.index[j]
             ps_injections_dict = dotdict({"time":t_ps, "batch" : ps_injections[cps_batch_var][j]})
 
-            psb_injections = psbDF[(psbDF.index > t_ps - psb_t_begin) & (psbDF.index < t_ps + psb_t_end)]
+            psb_injections = psbDF[(psbDF.index >= t_ps - psb_t_begin) & (psbDF.index <= t_ps + psb_t_end)]
             psb_list = []
 
             for k in range(0, len(psb_injections.index)):
@@ -1361,13 +1362,13 @@ def LHCInjectionTree (fill_no, treshhold = 1.0e+11):
                 psb_injections_dict = dotdict({"time":t_psb})
                 psb_list.append(psb_injections_dict)
 
-            ps_injections_dict.update(dotdict({"PSB_injections" : psb_list}))
+            ps_injections_dict.update(dotdict({"PSB" : psb_list}))
             ps_list.append(ps_injections_dict)
 
-        sps2_injections_dict.update({"PS_injections": ps_list})
+        sps2_injections_dict.update({"PS": ps_list})
         sps2_list.append(sps2_injections_dict)
 
-    tree["beam2"] = dotdict({"SPS_injections":sps2_list})
+    tree["beam2"] = dotdict({"SPS":sps2_list})
     
     return tree
 
