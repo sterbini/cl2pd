@@ -1225,7 +1225,7 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
     It represents the smallest jump in beam intensity that is the result of the injections.
     
     ========EXAMPLE========
-    tree = importData.injectionTree(6666)
+    tree = importData.LHCinjectionTree(6666)
     
     for SPS, i in zip(tree.beam1.atSPS, range(len(tree.beam1.atSPS))):
         print('SPS '+str(i) + ': '+ str(SPS.atTime))
@@ -1233,6 +1233,8 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
             print('\tPS '+str(i) + '.' + str(j) +': '+ str(PS.atTime))    
             for PSB, k in zip(PS.atPSB, range(len(PS.atPSB))):
                 print('\t\tPSB '+str(i) + '.' + str(j) +'.'+str(k)+': '+ str(PSB.atTime))
+                
+    importData.cycleStamp2pd(['CPS.LSA:CYCLE','CPS.TGM:USER','CPS.TGM:DEST'],myList[0:10])
     '''
 
     # Parameters for beam data extraction with LHCCals2pd
