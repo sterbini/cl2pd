@@ -5,6 +5,10 @@ import inspect
 # Fundamental contribution by R. De Maria et al.
 import pytimber
 import dotdict
+#For the dBLM2pd
+import h5py
+
+
 dotdict=dotdict.dotdict
 
 # TODO: discuss about the possible problem if the user has already defined a variable named 'cals' 
@@ -1378,3 +1382,99 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
     
     return tree
 
+def dBLM2pd(fileName, bunchList,rollInterval,t1=None,t2=None):
+    '''
+    It returns a pd dataframe with the list of bunches. 
+    
+    The fileName is the hdf5 file to read.
+        The dBLM folder is at
+        /eos/project/dblm/TZ76
+        so for instance you can find at 
+        /eos/project/dblm/TZ76/TCP_18_B2/hist_BOX2_0724-195110_f6972_ADJUST.hdf5
+        some the adjust of FILL 6972.
+        
+    The bunchList is the list of the bunches to consider in the pd dataframe.
+    
+    The rollInterval is delaying correctly the signal for proper gating
+        +++ IMPORTANT +++
+        Use rollInterval=20631 for Beam 1 and TZ76.
+        Use rollInterval=13332 for Beam 2 and TZ76.
+        For checking the delay have a look to the exa ple below.
+    
+    t1 and t2 are the timestamps to consider to windowing the analysis. 
+    
+    
+    Thanks to A. Gorzawski and A. Poyet for providing the insight and the original code.
+
+    === EXAMPLE ===
+    myFile='/eos/project/dblm/TZ76/TCP_18_B2/hist_BOX2_0724-195110_f6972_ADJUST.hdf5'
+    bunchList = np.array([10,390])
+    t1 = pd.Timestamp('2018-07-24 19:51:10.443826',tz='UTC')
+    t2 = pd.Timestamp('2018-07-25 20:51:10.443826',tz='CET')
+    aux=importData.dBLM2pd(myFile,bunchList,rollInterval=13332,t1=t1,t2=t2)
+    plt.plot(aux.resample('20s').mean())
+    plt.ylim(0,30)
+    
+    # checks the delay of B1
+    # in this fill we have two bunches in B1 in slot 10 and 50, 100 [start of the 12b],
+    # 200 [start of the 48b], 283 [start of the 48b] and 366 [start of the 48b] >> the first bunch slot available is 0 and not 1!
+    myFile='/eos/project/dblm/TZ76/TCP_18_B1/hist_BOX1_0724-195120_f6972_ADJUST.hdf5'
+    a = h5py.File(myFile,'r')
+    b = a['data']
+    index=b.keys()[0]
+    y=np.roll(b[index],20631,axis=0)
+    x=np.linspace(0,3564,len(b[index]))
+    a=plt.plot(x,y)
+    plt.xlim(365,366+49)# bunch 10 shuld ne between position 10 and 11.
+    
+    # checks the delay of B2
+    # in this fill we have two bunches in B2 in slot 10 and 390 >> the first bunch slot available is 0 and not 1!
+    myFile='/eos/project/dblm/TZ76/TCP_18_B2/hist_BOX2_0724-195110_f6972_ADJUST.hdf5'
+    a = h5py.File(myFile,'r')
+    b = a['data']
+    index=b.keys()[0]
+    y=np.roll(b[index],13332,axis=0)
+    x=np.linspace(0,3564,len(b[index]))
+    a=plt.plot(x,y)
+    plt.xlim(10,11)# bunch 10 shuld ne between position 10 and 11.
+    '''
+
+    '''
+    === ORIGINAL CODE FROM AXEL ===
+    # I preferred to use pandas systematically
+    final_DF = pd.DataFrame()
+    a = h5py.File(File,'r')
+    b = a['data']
+    keys  = b.keys()
+    interestingKeys = []
+    myInterestingKeys = []
+    for i in range(len(keys)):
+        if (datetime.datetime.strptime(keys[i],'%Y-%m-%d %H:%M:%S.%f')>t1) & (datetime.datetime.strptime(keys[i],'%Y-%m-%d %H:%M:%S.%f')<t2):
+            interestingKeys.append(keys[i])
+            myInterestingKeys.append(datetime.datetime.strptime(keys[i],'%Y-%m-%d %H:%M:%S.%f'))
+    aux = []
+    for i in interestingKeys:
+        aux.append(np.roll(b[i].value,13322,axis=0))
+    myDF = pd.DataFrame(np.stack(aux),index = myInterestingKeys)
+    bunchCenters = np.zeros(len(fill))
+    for i in range(len(fill)):
+        bunchCenters[i] = int(fill[i]/3564.*55578)
+        final_DF['bunch_'+str(fill[i])] = myDF.ix[:,(bunchCenters[i]-nbBins/2):(bunchCenters[i]+nbBins/2)].sum(axis=1).diff().resample(str(secondOfResampling)+'s').sum()/secondOfResampling
+    return final_DF
+    '''
+    a = h5py.File(fileName,'r')
+    b = a['data']
+    
+    myDF=pd.DataFrame()
+    
+    aux=pd.DataFrame(b.keys(),index=map(pd.Timestamp,b.keys()),columns=['KEY'] )
+    aux.index=aux.index.tz_localize('CET').tz_convert('UTC')
+    if t1==None: t1=aux.index[0]
+    if t2==None: t2=aux.index[-1]
+    aux=aux[t1:t2].copy()
+    # the rollInterval depends on the electric delay of the acquisition device wrt the bunch 0
+    aux['VALUE']=aux['KEY'].apply(lambda x:np.roll(b[x],rollInterval,axis=0)) 
+    for i in bunchList:
+        # Integrating between 5 and 95% of the bunch slot and differentiating
+        myDF['bunch_'+str(i)]=aux['VALUE'].apply(lambda x:np.sum(x[int((i+0.05)/3564.*55578):int((i+0.95)/3564.*55578)])).diff()
+    return myDF
