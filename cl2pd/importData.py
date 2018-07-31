@@ -1374,5 +1374,5 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
     tree["beam1"].update({"atDump":list(only_min_b1.index)})
     tree["beam2"].update({"atDump":list(only_min_b2.index)})
     
-return tree
+    return tree
 
