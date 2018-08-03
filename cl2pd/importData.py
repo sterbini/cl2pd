@@ -1223,13 +1223,13 @@ def LHCFillsMappingAggregation_v2 (listOfVariables, fillNos, beamModeList = None
 
     return resultDF.reset_index().set_index('fill')
 
-def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHYS']):
+def LHCInjectionTree (fill_no, beam_mode = ['INJPROT', 'INJPHYS']):
     '''
     For a given fill number, this function constructs its injection tree. Treshold number might have to be adjusted.
     It represents the smallest jump in beam intensity that is the result of the injections.
     
     ========EXAMPLE========
-    tree = importData.LHCinjectionTree(6666)
+    tree = importData.injectionTree(6666)
     
     for SPS, i in zip(tree.beam1.atSPS, range(len(tree.beam1.atSPS))):
         print('SPS '+str(i) + ': '+ str(SPS.atTime))
@@ -1237,14 +1237,9 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
             print('\tPS '+str(i) + '.' + str(j) +': '+ str(PS.atTime))    
             for PSB, k in zip(PS.atPSB, range(len(PS.atPSB))):
                 print('\t\tPSB '+str(i) + '.' + str(j) +'.'+str(k)+': '+ str(PSB.atTime))
-                
-    importData.cycleStamp2pd(['CPS.LSA:CYCLE','CPS.TGM:USER','CPS.TGM:DEST'],myList[0:10])
-    '''
-
-    # Parameters for beam data extraction with LHCCals2pd
-    beam_vars = 'LHC.BCTFR.A6R4.B%:BEAM_INTENSITY'
-    beam1_var = 'LHC.BCTFR.A6R4.B1:BEAM_INTENSITY'
-    beam2_var = 'LHC.BCTFR.A6R4.B2:BEAM_INTENSITY'
+    '''   
+    patern1_var = 'LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'
+    patern2_var = 'LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'
 
     # Parameters for injection data extractions
     all_injection_vars = ['%.TGM:BATCH', '%PS%.TGM:%DEST%']
@@ -1269,29 +1264,25 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
     # This function can be used to construct an injection three in beam 1 and 2.
     # First the BEAM intensity data is extracted as it is the only reliable
     # source of information for the final level (SPS) injections to the beams
-    beam_data = LHCCals2pd(beam_vars, fill_no, beam_mode)
+    paternDF = LHCCals2pd([patern1_var, patern2_var],fill_no, beam_mode)
 
-    # To calculate the exact moments of injections, difference of the beam intensity
-    # is calcualted. The peaks represent the moments of injections
-    difference1 = beam_data[beam1_var].diff()
-    diff1DF = pd.DataFrame(difference1)
+    patern1DF = pd.DataFrame(paternDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].map(np.array))
+    patern2DF = pd.DataFrame(paternDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].map(np.array))
 
-    difference2 = beam_data[beam2_var].diff()
-    diff2DF = pd.DataFrame(difference2)
+    diff1DF = patern1DF.diff().dropna()
+    bunches_added_b1 = pd.DataFrame(diff1DF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].map(lambda x : np.where(x == 1.0)[0]))
+    bunches_added_b1['change in B1'] = (bunches_added_b1['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].map(lambda x : x.size is not 0))
 
-    # To extract the peaks, simple procedure is used 
-    # First all points that are heigher than their neigbours are marked
-    diff1DF['max'] = (diff1DF[beam1_var])[(diff1DF[beam1_var].shift(1) < diff1DF[beam1_var]) & (diff1DF[beam1_var].shift(-1) < diff1DF[beam1_var])]
-    diff2DF['max'] = (diff2DF[beam2_var])[(diff2DF[beam2_var].shift(1) < diff2DF[beam2_var]) & (diff2DF[beam2_var].shift(-1) < diff2DF[beam2_var])]
-    
-    # Than all points that are not heigher are dropped
-    diff1DF = diff1DF.dropna()
-    diff2DF = diff2DF.dropna()
+    diff2DF = patern2DF.diff().dropna()
+    bunches_added_b2 = pd.DataFrame(diff2DF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].map(lambda x : np.where(x == 1.0)[0]))
+    bunches_added_b2['change in B2'] = (bunches_added_b2['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].map(lambda x : x.size is not 0))
+
 
     # In the end, all maxima that are lower than some treshold are discarded
-    only_max_b1 = diff1DF[diff1DF[beam1_var] > threshold]
-    only_max_b2 = diff2DF[diff2DF[beam2_var] > threshold]
+    only_max_b1 = bunches_added_b1[bunches_added_b1['change in B1'] == True]
+    only_max_b2 = bunches_added_b2[bunches_added_b2['change in B2'] == True]
 
+    only_max = [only_max_b1, only_max_b2]
     # To get exact moments of injections, it is required to get all of the injection data
     injection_data = LHCCals2pd(all_injection_vars, fill_no, beam_mode)
 
@@ -1308,11 +1299,15 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
 
     for t2 in only_max_b1.index:
         t1 = t2 - sps_t_delta
-        sps_injections_b1 = sps_injections_b1.append(spsDF_b1[ (spsDF_b1.index > t1) & (spsDF_b1.index < t2) ])
+        new_injection = spsDF_b1[(spsDF_b1.index > t1) & (spsDF_b1.index < t2)]
+        if not new_injection.index.empty and new_injection.index[0] not in sps_injections_b1.index:
+            sps_injections_b1 = sps_injections_b1.append(new_injection)
 
     for t2 in only_max_b2.index:
         t1 = t2 - sps_t_delta
-        sps_injections_b2 = sps_injections_b2.append(spsDF_b2[ (spsDF_b2.index > t1) & (spsDF_b2.index < t2) ])
+        new_injection = spsDF_b2[(spsDF_b2.index > t1) & (spsDF_b2.index < t2)]
+        if not new_injection.index.empty and new_injection.index[0] not in sps_injections_b2.index:
+            sps_injections_b2 = sps_injections_b2.append(new_injection)
 
     # These lists are related to the dotdictonary that will contain all of the other injections
     tree = dotdict()
@@ -1338,7 +1333,6 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
             #Then we iterate through all the ps injectios in particular sps injection
             for j in range(0, len(ps_injections.index)):
 
-                #pdb.set_trace()
                 t_ps = ps_injections.index[j]
                 ps_injections_dict = dotdict({"atTime":t_ps, "atBatch" : ps_injections[cps_batch_var][j]})
 
@@ -1355,31 +1349,53 @@ def LHCInjectionTree (fill_no, threshold = 2e+9, beam_mode = ['INJPROT', 'INJPHY
                 ps_list.append(ps_injections_dict)
 
             sps_injections_dict.update({"atPS": ps_list})
+            sps_injections_dict.update({"atBunches": only_max[b].iloc[i, 0]})
             sps_list[b].append(sps_injections_dict)
 
     tree["beam1"] = dotdict({"atSPS":sps_list[0]})
     tree["beam2"] = dotdict({"atSPS":sps_list[1]})
 
     # DETECTION OF DUMPS
-    # Similar method as for detection of injections is used.
-    diff1DF = pd.DataFrame(difference1)
-    diff2DF = pd.DataFrame(difference2)
 
-    # First all points that are lower than their neigbours are marked
-    diff1DF['min'] = (diff1DF[beam1_var])[(diff1DF[beam1_var].shift(1) > diff1DF[beam1_var]) & (diff1DF[beam1_var].shift(-1) > diff1DF[beam1_var])]
-    diff2DF['min'] = (diff2DF[beam2_var])[(diff2DF[beam2_var].shift(1) > diff2DF[beam2_var]) & (diff2DF[beam2_var].shift(-1) > diff2DF[beam2_var])]
-    
-    # Than all points that are not lower are dropped
-    diff1DF = diff1DF.dropna()
-    diff2DF = diff2DF.dropna()
 
-    # In the end, all minima that are higher than some threshold are discarded
-    only_min_b1 = diff1DF[diff1DF[beam1_var] < -threshold]
-    only_min_b2 = diff2DF[diff2DF[beam2_var] < -threshold]
+    bunches_removed_b1 = pd.DataFrame(diff1DF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].map(lambda x : np.where(x == -1.0)[0]))
+    bunches_removed_b1['change in B1'] = (bunches_removed_b1['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].map(lambda x : x.size is not 0))
+    bunches_removed_b1['empty'] = patern1DF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].map(lambda x : np.sum(x) == 0.0)
+
+    bunches_removed_b2 = pd.DataFrame(diff2DF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].map(lambda x : np.where(x == -1.0)[0]))
+    bunches_removed_b2['change in B2'] = (bunches_removed_b2['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].map(lambda x : x.size is not 0))
+    bunches_removed_b2['empty'] = patern2DF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].map(lambda x : np.sum(x) == 0.0)
     
-    tree["beam1"].update({"atDump":list(only_min_b1.index)})
-    tree["beam2"].update({"atDump":list(only_min_b2.index)})
+    dump_b1 = bunches_removed_b1[(bunches_removed_b1['change in B1'] == True) & (bunches_removed_b1['empty'] == True)]
+    dump_b2 = bunches_removed_b2[(bunches_removed_b2['change in B2'] == True) & (bunches_removed_b2['empty'] == True)]    
     
+    dump_list = [[], []]
+    dump_bunches = [dump_b1, dump_b2]
+    
+    for b in range(0, 2):
+        for i in range(0, len(dump_bunches[b].index)):
+            dump_dict = dotdict({"atTime":dump_bunches[b].index[i]})
+            dump_dict.update({"atBunches":dump_bunches[b].iloc[i, 0]})
+            dump_list[b].append(dump_dict)
+    
+    tree["beam1"].update({"atDump":dump_list[0]})      
+    tree["beam2"].update({"atDump":dump_list[1]})
+    
+    lost_b1 = bunches_removed_b1[(bunches_removed_b1['change in B1'] == True) & (bunches_removed_b1['empty'] == False)]
+    lost_b2 = bunches_removed_b2[(bunches_removed_b2['change in B2'] == True) & (bunches_removed_b2['empty'] == False)]    
+    
+    lost_list = [[], []]
+    lost_bunches = [lost_b1, lost_b2]
+    
+    for b in range(0, 2):
+        for i in range(0, len(lost_bunches[b].index)):
+            lost_dict = dotdict({"atTime":lost_bunches[b].index[i]})
+            lost_dict.update({"atBunches":lost_bunches[b].iloc[i, 0]})
+            lost_list[b].append(lost_dict)
+    
+    tree["beam1"].update({"atLost":lost_list[0]})      
+    tree["beam2"].update({"atLost":lost_list[1]})
+            
     return tree
 
 def dBLM2pd(fileName, bunchList,rollInterval,t1=None,t2=None):
