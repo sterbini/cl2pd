@@ -698,6 +698,25 @@ def LHCInstant(t1,timeSpan_days=1):
     aux= aux[aux['test']]
     del aux['test']
     return aux
+    '''
+    #proposition
+    def LHCInstant(t1):
+        if t1.tz==None: t1=t1.tz_localize('UTC')
+        else: t1=t1.astimezone('UTC')
+
+        aux=cals2pd(['HX:FILLN'],t1,'last')['HX:FILLN'].values
+        if len(aux)>0:
+            aux=LHCFillsByNumber(np.int(aux[0]))
+            aux=aux[aux['mode']!='FILL']
+            aux['test']=aux.apply(lambda x: x['startTime']<=t1<=x['endTime'] , axis=1)
+            if len(aux)==0:
+                return pd.DataFrame();
+            aux= aux[aux['test']]
+            del aux['test']
+            return aux
+        else:
+            return pd.DataFrame()
+    '''
 
 
 # TEST FUNCTIONS
