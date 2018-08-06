@@ -1321,12 +1321,16 @@ def LHCInjectionTree (fill_no, beam_mode = ['INJPROT', 'INJPHYS']):
         new_injection = spsDF_b1[(spsDF_b1.index > t1) & (spsDF_b1.index < t2)]
         if not new_injection.index.empty and new_injection.index[0] not in sps_injections_b1.index:
             sps_injections_b1 = sps_injections_b1.append(new_injection)
+        else:
+            only_max_b1.drop(t2)
 
     for t2 in only_max_b2.index:
         t1 = t2 - sps_t_delta
         new_injection = spsDF_b2[(spsDF_b2.index > t1) & (spsDF_b2.index < t2)]
         if not new_injection.index.empty and new_injection.index[0] not in sps_injections_b2.index:
             sps_injections_b2 = sps_injections_b2.append(new_injection)
+        else:
+            only_max_b2.drop(t2)
 
     # These lists are related to the dotdictonary that will contain all of the other injections
     tree = dotdict()
@@ -1344,6 +1348,7 @@ def LHCInjectionTree (fill_no, beam_mode = ['INJPROT', 'INJPHYS']):
 
             t_sps = sps_injections[b].index[i]
             sps_injections_dict = dotdict({"atTime":t_sps})
+            sps_injections_dict.update({"atTimeBCT":only_max[b].index[i]})
 
             ps_injections = psDF[(psDF.index >= t_sps - ps_t_begin) & (psDF.index <= t_sps + ps_t_end)]
 
