@@ -1518,3 +1518,33 @@ def dBLM2pd(fileName, bunchList,rollInterval,t1=None,t2=None):
         # Integrating between 5 and 95% of the bunch slot and differentiating
         myDF['bunch_'+str(i)]=aux['VALUE'].apply(lambda x:np.sum(x[int((i+0.05)/3564.*55578):int((i+0.95)/3564.*55578)])).diff()
     return myDF
+
+def LHCBunchLifeTimeInSquezee (noOfFill, resample_second = 60, duration_of_stable = pd.Timedelta('0 days 00:10:00')):
+    '''
+    
+    This function returns the bunch lifetime in the squezee and optionaly in stable (default first 10 minutes) mode for the requested fill
+    
+    ===EXAMPLE===
+    beam1DF, beam2DF = importData.LHCBunchLifeTimeInSquezee (6778)
+    beam1DF, beam2DF = importData.LHCBunchLifeTimeInSquezee (6778, resample_second = 60, duration_of_stable = pd.Timedelta('0 days 00:10:00'))
+    
+    '''
+    
+    bunch_intensity = LHCCals2pd(['LHC.BCTFR.A6R4.B%:BUNCH_INTENSITY'], noOfFill, ['SQUEEZE'])#, flag='duration', duration=pd.Timedelta('0 days 00:05:00'))
+    bunch_intensity = bunch_intensity.append(LHCCals2pd(['LHC.BCTFR.A6R4.B%:BUNCH_INTENSITY'], noOfFill, ['STABLE'], flag='duration', duration = duration_of_stable))
+    
+    noOfBunch = len(bunch_intensity['LHC.BCTFR.A6R4.B1:BUNCH_INTENSITY'].iloc[0])
+
+    beam1DF=pd.DataFrame()
+    beam2DF=pd.DataFrame()
+
+    for i in range(0, noOfBunch):
+        a1 = bunch_intensity['LHC.BCTFR.A6R4.B1:BUNCH_INTENSITY'].dropna().apply(lambda x: x[i]).resample(str(resample_second)+'s').mean()
+        b1 = a1.diff()/resample_second
+        beam1DF['lifetime of bunch ' + str(i)+ ' [h]'] = - ((a1/b1).dropna())/3600
+
+        a2 = bunch_intensity['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY'].dropna().apply(lambda x: x[i]).resample(str(resample_second)+'s').mean()
+        b2 = a2.diff()/resample_second
+        beam2DF['lifetime of bunch ' + str(i)+ ' [h]'] = - ((a2/b2).dropna())/3600
+    
+return beam1DF, beam2DF
