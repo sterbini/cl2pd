@@ -273,3 +273,122 @@ def plotBBEncounterSchedule(BBEncounterSchedule,beam,bunch,exp):
             setArrowLabel(plt.gca(), label=str(encounters[-1]), arrowPosition=(x[-1], y[-1]), labelPosition=(x[-1]+5, y[-1]-.01), myColor='r', arrowArc_rad=-0.2)
     plt.grid(ls=':')
     return plt.gca()
+
+  def LHCPlotLossRateAtSqueeze(fillNo, whichIP = 1, first = 1, last = 3564, resample_second = 60, beam1DF = None, beam2DF = None, fig = None, ax = None):
+    
+    '''    
+    Plots inverse function of lifetime for a single bunch in the time moment where beta functions is lowest for
+    chosen IP.
+    
+    ===EXAMPLE===
+    fig, ax = plt.subplots(1, 1)
+    beam1DF, beam2DF = importData.LHCBunchLifeTimeInSquezee (6778, resample_second = 60, duration_of_stable = pd.Timedelta('0 days 00:10:00'))
+    plotFunctions.LHCPlotLossRateAtSqueeze(6778, first = 500, last = 800, beam1DF = beam1DF, beam2DF = beam2DF, fig = fig, ax = ax)    
+    '''    
+    if beam1DF is None or beam2DF is None:        
+        beam1DF, beam2DF = importData.LHCBunchLifeTimeInSquezee (fillNo, resample_second = 60)
+        
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(1, 1)
+        
+    last_bunch = importData.LHCCals2pd(['HX:BETASTAR_IP1'], fillNo, 'STABLE', flag = 'last')
+    values = beam1DF.loc[last_bunch.index.floor('min')].values
+    ax.plot(np.arange(first - 1, last - 1), 100/values[0, first - 1:last - 1], 'b')
+    
+    values = beam2DF.loc[last_bunch.index.floor('min')].values
+    ax.plot(np.arange(first - 1, last - 1), 100/values[0, first - 1:last - 1], 'r')
+    
+    ax.set(xlabel = 'Bunch number', ylabel = 'Loss rate [%]')
+    ax.legend(['Beam 1', 'Beam 2'])
+
+    return fig, ax
+
+def LHCPlotBunchPartnerIntensity(fillNo, bunchNo, scheduleDF = None, intensityDF = None, fig = None, ax = None):
+    '''
+    This function plots intensities of bunches in beam two that interact with bunchNo 
+    from beam one. 
+    
+    scheduleDF represents the Beam one collision schedule 
+    intensityDF represents the intensities of bunches in the 4 IPs
+    
+    ===EXAMPLE===
+    fillNo = 6776
+    
+    beam1DF, beam2DF = importData.LHCBunchLifeTimeInSquezee (fillNo, resample_second = 60, duration_of_stable = pd.Timedelta('0 days 00:10:00'))
+    fillingSchemeDF=importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'], fillNo, ['FLATTOP'],flag='next')
+    
+    B1_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].dropna().iloc[0]
+    B2_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].dropna().iloc[0]
+    
+    scheduleDF = bbFunctions.B1CollisionScheduleDF(B1_bunches, B2_bunches, 25)
+    intensityDF = importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY'], fillNo, ['STABLE'],flag='last')
+    
+    fig, ax = plt.subplots(2, 3, figsize = (20, 10))
+
+    selected_bunches = [941, 997, 1050]
+
+    plotFunctions.LHCPlotLossRateAtSqueeze(fillNo, whichIP=1, first=800, last=1500, resample_second=60, beam1DF=beam1DF, beam2DF=beam2DF, fig = fig, ax = ax[0][0])
+    plotFunctions.LHCPlotLossRateAtSqueeze(fillNo, whichIP=1, first=800, last=1500, resample_second=60, beam1DF=beam1DF, beam2DF=beam2DF, fig = fig, ax = ax[0][1])
+    plotFunctions.LHCPlotLossRateAtSqueeze(fillNo, whichIP=1, first=800, last=1500, resample_second=60, beam1DF=beam1DF, beam2DF=beam2DF, fig = fig, ax = ax[0][2])
+
+    plotFunctions.LHCPlotBunchPartnerIntensity(fillNo, selected_bunches[0], scheduleDF = scheduleDF, intensityDF = intensityDF, fig = fig, ax = ax[1][0])
+    plotFunctions.LHCPlotBunchPartnerIntensity(fillNo, selected_bunches[1], scheduleDF = scheduleDF, intensityDF = intensityDF, fig = fig, ax = ax[1][1])
+    plotFunctions.LHCPlotBunchPartnerIntensity(fillNo, selected_bunches[2], scheduleDF = scheduleDF, intensityDF = intensityDF, fig = fig, ax = ax[1][2])
+
+    bunches = ax[0][0].lines[0].get_xydata()[:, 0]
+    loss_rate = ax[0][0].lines[0].get_xydata()[:, 1]
+
+    ax[0][0].plot(selected_bunches[0], loss_rate[bunches == selected_bunches[0]], 'yo')
+    ax[0][1].plot(selected_bunches[1], loss_rate[bunches == selected_bunches[1]], 'yo')
+    ax[0][2].plot(selected_bunches[2], loss_rate[bunches == selected_bunches[2]], 'yo')    
+    '''
+    
+    #=========IMPORTING OF DATA
+    if scheduleDF is None:
+        fillingSchemeDF = importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B%:BUNCH_FILL_PATTERN'], fillNo, ['FLATTOP'],flag='next')
+        B1_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B1:BUNCH_FILL_PATTERN'].dropna().iloc[0]
+        B2_bunches = fillingSchemeDF['LHC.BCTFR.A6R4.B2:BUNCH_FILL_PATTERN'].dropna().iloc[0]
+        scheduleDF = bbFunctions.B1CollisionScheduleDF(B1_bunches, B2_bunches, 25)
+
+    if intensityDF is None:
+        intensityDF = importData.LHCFillsAggregation(['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY'], fillNo, ['STABLE'],flag='last')
+    #=========
+    
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(1, 1)
+    
+    position_ALICE = scheduleDF.loc[bunchNo]['Positions in ALICE']
+    partner_ALICE = scheduleDF.loc[bunchNo]['BB partners in ALICE'].astype(int)
+
+    position_ATLAS = scheduleDF.loc[bunchNo]['Positions in ATLAS/CMS']
+    partner_ATLAS = scheduleDF.loc[bunchNo]['BB partners in ATLAS/CMS'].astype(int)
+
+    position_LHCB = scheduleDF.loc[bunchNo]['Positions in LHCB']
+    partner_LHCB = scheduleDF.loc[bunchNo]['BB partners in LHCB'].astype(int)
+
+
+    y_ALICE = np.array([1]*len(position_ALICE))
+    y_ATLAS = np.array([0]*len(position_ATLAS))
+    y_LHCB = np.array([-1]*len(position_LHCB))
+
+    intensity = intensityDF['LHC.BCTFR.A6R4.B2:BUNCH_INTENSITY']
+    intensity = np.array(intensity.iloc[0])
+
+    ax.scatter(position_ALICE, y_ALICE, alpha=1, cmap='jet', c= intensity[partner_ALICE], vmin = 0.9e11, vmax = 1.25e11)
+    setArrowLabel(ax, label=str(partner_ALICE[0]), arrowPosition=(position_ALICE[0], y_ALICE[0]), labelPosition=(position_ALICE[0], y_ALICE[0]-.5), myColor='r', arrowArc_rad=0.2)
+    setArrowLabel(ax, label=str(partner_ALICE[-1]), arrowPosition=(position_ALICE[-1], y_ALICE[-1]), labelPosition=(position_ALICE[-1], y_ALICE[0]-.5), myColor='r', arrowArc_rad=-0.2)
+
+    ax.scatter(position_ATLAS, y_ATLAS, alpha=1, cmap='jet', c = intensity[partner_ATLAS], vmin = 0.9e11, vmax = 1.25e11)
+    setArrowLabel(ax, label=str(partner_ATLAS[0]), arrowPosition=(position_ATLAS[0], y_ATLAS[0]), labelPosition=(position_ATLAS[0], y_ATLAS[0]-.5), myColor='r', arrowArc_rad=0.2)
+    setArrowLabel(ax, label=str(partner_ATLAS[-1]), arrowPosition=(position_ATLAS[-1], y_ATLAS[-1]), labelPosition=(position_ATLAS[-1], y_ATLAS[0]-.5), myColor='r', arrowArc_rad=-0.2)
+
+    paths = ax.scatter(position_LHCB, y_LHCB, alpha=1, cmap='jet', c= intensity[partner_LHCB], vmin = 0.9e11, vmax = 1.25e11)
+    setArrowLabel(ax, label=str(partner_LHCB[0]), arrowPosition=(position_LHCB[0], y_LHCB[0]), labelPosition=(position_LHCB[0], y_LHCB[0]-.5), myColor='r', arrowArc_rad=0.2)
+    setArrowLabel(ax, label=str(partner_LHCB[-1]), arrowPosition=(position_LHCB[-1], y_LHCB[-1]), labelPosition=(position_LHCB[-1], y_LHCB[0]-.5), myColor='r', arrowArc_rad=-0.2)
+
+    ax.set(yticks = [1, 0, -1], yticklabels = ['ALICE', 'ATLAS/CMS', 'LHCB'], ylim = [-1.8, 1.8], xlim = [-26, 26], xlabel = 'Bunch partner in B2')
+    colorbar_handle = fig.colorbar(paths, ax = ax)
+    colorbar_handle.set_label('Bunch intensity')
+    ax.axvline(x=0)
+    
+    return fig, ax
