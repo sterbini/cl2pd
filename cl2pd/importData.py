@@ -1548,3 +1548,26 @@ def LHCBunchLifeTimeInSquezee (noOfFill, resample_second = 60, duration_of_stabl
         beam2DF['lifetime of bunch ' + str(i)+ ' [h]'] = - ((a2/b2).dropna())/3600
     
 return beam1DF, beam2DF
+
+def bunch2SPSInjection (tree, noBunch):
+    '''
+    This function identifies in which SPS injection of a paricular tree a bunch is located.
+    ===EXAMPLE===
+    fillNo = 6666
+    bunchNo = 522
+    tree = importData.LHCInjectionTree(fillNo)
+    noOfSPS = importData.bunch2SPSInjection (tree, noBunch)
+    # Last time bunchNo was injected in beam 1
+    noOfSPS = noOfSPS[0][-1]
+    '''
+    noBunch = 522
+    noOfSPS = [[], []]
+
+    beam = [tree.beam1, tree.beam2]
+
+    for b in range(0, 2):
+        for i in range(len(beam[b].atSPS)):
+            if noBunch in beam[b].atSPS[i].atBunches:
+                noOfSPS[b].append(i)
+                
+    return noOfSPS
