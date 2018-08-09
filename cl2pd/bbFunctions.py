@@ -1,5 +1,5 @@
 import numpy as np 
-import dotdict
+from . import dotdict
 import pandas as pd
 dotdict=dotdict.dotdict
 
@@ -255,7 +255,7 @@ def B1CollisionScheduleDF (B1_bunches, B2_bunches, numberOfLRToConsider):
     B1_bunches_index = np.where(B1_bunches)[0]
     B2_bunches_index = np.where(B2_bunches)[0]
     
-    if isinstance(numberOfLRToConsider, (int, long)):
+    if isinstance(numberOfLRToConsider, int):
         numberOfLRToConsider = [numberOfLRToConsider, numberOfLRToConsider, numberOfLRToConsider]
     
     B1df = pd.DataFrame() 
@@ -386,7 +386,7 @@ def B2CollisionScheduleDF (B1_bunches, B2_bunches, numberOfLRToConsider):
     B1_bunches_index = np.where(B1_bunches)[0]
     B2_bunches_index = np.where(B2_bunches)[0]
     
-    if isinstance(numberOfLRToConsider, (int, long)):
+    if isinstance(numberOfLRToConsider, int):
         numberOfLRToConsider = [numberOfLRToConsider, numberOfLRToConsider, numberOfLRToConsider]
     
     B2df = pd.DataFrame() 
