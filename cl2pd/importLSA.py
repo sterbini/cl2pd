@@ -8,7 +8,7 @@ t2=pd.Timestamp('2017-11-22 13:42',tz='CET')
 importLSA.LHCLsa2pd(['LHCBEAM1/QH_TRIM','LHCBEAM1/QV_TRIM'],['RAMP-6.5TeV-HIGH-BETA-V2-2017_V1@0_[START]'],t1,t2)            
 '''
 
-import importData
+from . import importData
 import pjlsa
 
 pd=importData.pd     # is the pandas package
@@ -27,14 +27,14 @@ def LHCLsa2pd(parameterList, beamprocessList, t1, t2, verbose=False):
     '''
     if t1.tz==None:
         t1=t1.tz_localize('UTC')
-        if verbose: print('t1 is UTC localized: ' + str(t1))
+        if verbose: print(('t1 is UTC localized: ' + str(t1)))
 
     # LSA needs CET as internal variable
     t1=t1.astimezone('CET')
 
     if t2.tz==None:
         t2=t2.tz_localize('UTC')
-        if verbose: print('t2 is UTC localized: '+ str(t2))
+        if verbose: print(('t2 is UTC localized: '+ str(t2)))
    
     # LSA needs CET as internal variable
     t2=t2.astimezone('CET')
