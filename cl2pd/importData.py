@@ -4,7 +4,7 @@ import os
 import inspect
 # Fundamental contribution by R. De Maria et al.
 import pytimber
-import dotdict
+from . import dotdict
 #For the dBLM2pd
 import h5py
 
@@ -59,7 +59,7 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     
     if t1.tz==None:
         t1=t1.tz_localize('UTC')
-        if verbose: print('t1 is UTC localized: ' + str(t1))
+        if verbose: print(('t1 is UTC localized: ' + str(t1)))
 
     # pyTimber needs CET as internal variable
     t1=t1.astimezone('CET')
@@ -67,7 +67,7 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
     if not isinstance(t2, str):
         if t2.tz==None:
             t2=t2.tz_localize('UTC')
-            if verbose: print('t2 is UTC localized: '+ str(t2))
+            if verbose: print(('t2 is UTC localized: '+ str(t2)))
         # pyTimber needs CET as internal variable
         t2=t2.astimezone('CET')
 
@@ -83,7 +83,7 @@ def _noSplitcals2pd(listOfVariables, t1, t2, fundamental='', verbose=False):
 
     if DATA!={}:
         for i in listOfVariableToAdd:
-            if verbose: print('Elaborating variable: '+ i)
+            if verbose: print(('Elaborating variable: '+ i))
             auxDataFrame=pd.DataFrame()                
             auxDataFrame[i]=pd.Series(DATA[i][1].tolist(),pd.to_datetime(DATA[i][0],unit='s'))
             # important function to keep in mind
@@ -127,7 +127,7 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
         times= pd.to_datetime(np.linspace(t1.value, t2.value, split+1))
         myDF=pd.DataFrame()
         for i in range(len(times)-1):
-            if verbose: print('Time window: '+str(i+1)) 
+            if verbose: print(('Time window: '+str(i+1))) 
             aux=_noSplitcals2pd(listOfVariables,times[i],times[i+1], fundamental=fundamental, verbose=verbose)
             myDF=pd.concat([myDF,aux])
     return myDF.sort_index(axis=1)
@@ -262,7 +262,7 @@ def LHCFillsByNumber(fillList, verbose=False):
     # We iterate in the fills
     for i in fillList:
 
-        if verbose: print('Fill ' + str(i))
+        if verbose: print(('Fill ' + str(i)))
 
         DATA=cals.getLHCFillData(i)
 
@@ -521,7 +521,7 @@ class _TFS:
                 try:
                     exec("self."+label+"= "+str(float((line.replace( '"', '')).split()[3])))
                 except:
-                    print("Problem parsing: "+ line)
+                    print(("Problem parsing: "+ line))
                     print("Going to be parsed as string")
                     try:
                         exec("self."+label+"= \""+(line.split()[3]).replace( '"', '')+"\"")
@@ -590,7 +590,7 @@ def _tfs2pd(myFile):
         for i in a.keys:
             myContainer=getattr(a, i)
             if len(myContainer)==0:
-                print("The column "+ i + ' is empty.')
+                print(("The column "+ i + ' is empty.'))
             else:
                 myColumns.append(i)
                 myList.append(myContainer)
@@ -658,17 +658,17 @@ def _LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose
     listDF=[]
 
     for fill in fillList: 
-        if verbose: print('Fill: '+str(fill))
+        if verbose: print(('Fill: '+str(fill)))
         fillDF=LHCFillsByNumber(fill)
         for BM in beamModeList:
             aux=fillDF[fillDF['mode']==BM]
-            if verbose: print('Beam mode: '+BM)
+            if verbose: print(('Beam mode: '+BM))
 
             for index,row in aux.iterrows():
                 t1=row.startTime
                 t2=row.endTime
-                if verbose: print('Start time: '+str(t1))
-                if verbose: print('End time: '+str(t2))
+                if verbose: print(('Start time: '+str(t1)))
+                if verbose: print(('End time: '+str(t2)))
                 listDF.append(cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose))
     if listDF==[]:
         return pd.DataFrame()
@@ -746,17 +746,17 @@ def _LHCCals2pd_ver1(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
     listDF=[]
 
     for fill in fillList: 
-        if verbose: print('Fill: '+str(fill))
+        if verbose: print(('Fill: '+str(fill)))
         fillDF=LHCFillsByNumber(fill)
         for BM in beamModeList:
             aux=fillDF[fillDF['mode']==BM]
-            if verbose: print('Beam mode: '+BM)
+            if verbose: print(('Beam mode: '+BM))
 
             for index,row in aux.iterrows():
                 t1=row.startTime
                 t2=row.endTime
-                if verbose: print('Start time: '+str(t1))
-                if verbose: print('End time: '+str(t2))
+                if verbose: print(('Start time: '+str(t1)))
+                if verbose: print(('End time: '+str(t2)))
                 out=cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
                 if fill_column:
                     out['fill']=fill
@@ -800,17 +800,17 @@ def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=
     
     if flag=='':
         for fill in fillList: 
-            if verbose: print('Fill: '+str(fill))
+            if verbose: print(('Fill: '+str(fill)))
             fillDF=LHCFillsByNumber(fill)
             for BM in beamModeList:
                 aux=fillDF[fillDF['mode']==BM]
-                if verbose: print('Beam mode: '+BM)
+                if verbose: print(('Beam mode: '+BM))
 
                 for index,row in aux.iterrows():
                     t1=row.startTime+offset
                     t2=row.endTime+offset
-                    if verbose: print('Start time: '+str(t1))
-                    if verbose: print('End time: '+str(t2))
+                    if verbose: print(('Start time: '+str(t1)))
+                    if verbose: print(('End time: '+str(t2)))
                     out=cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
                     if fill_column:
                         out['fill']=fill
@@ -824,17 +824,17 @@ def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=
         
     if (flag=='last') or (flag=='next'):
         for fill in fillList: 
-            if verbose: print('Fill: '+str(fill))
+            if verbose: print(('Fill: '+str(fill)))
             fillDF=LHCFillsByNumber(fill)
             for BM in beamModeList:
                 aux=fillDF[fillDF['mode']==BM]
-                if verbose: print('Beam mode: '+BM)
+                if verbose: print(('Beam mode: '+BM))
 
                 for index,row in aux.iterrows():
                     t1=row.startTime+offset
                     t2=flag
-                    if verbose: print('Start time: '+str(t1))
-                    if verbose: print('End time: '+str(t2))
+                    if verbose: print(('Start time: '+str(t1)))
+                    if verbose: print(('End time: '+str(t2)))
                     out=cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
                     if fill_column:
                         out['fill']=fill
@@ -848,17 +848,17 @@ def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=
         
     if (flag=='duration'):
         for fill in fillList: 
-            if verbose: print('Fill: '+str(fill))
+            if verbose: print(('Fill: '+str(fill)))
             fillDF=LHCFillsByNumber(fill)
             for BM in beamModeList:
                 aux=fillDF[fillDF['mode']==BM]
-                if verbose: print('Beam mode: '+BM)
+                if verbose: print(('Beam mode: '+BM))
 
                 for index,row in aux.iterrows():
                     t1=row.startTime+offset
                     t2=t1+duration
-                    if verbose: print('Start time: '+str(t1))
-                    if verbose: print('End time: '+str(t2))
+                    if verbose: print(('Start time: '+str(t1)))
+                    if verbose: print(('End time: '+str(t2)))
                     out=cals2pd(listOfVariables,t1,t2, split=split, verbose=verbose)
                     if fill_column:
                         out['fill']=fill
@@ -910,7 +910,7 @@ def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, function
     # ('duration', Timedelta('0 days 00:00:05'))]
     
     a = inspect.getargspec(LHCCals2pd)
-    defaultValues = zip(a.args[-len(a.defaults):],a.defaults)
+    defaultValues = list(zip(a.args[-len(a.defaults):],a.defaults))
     
     defaultBeamModeList = defaultValues[0][1]
     defaultFlag = defaultValues[5][1]
@@ -924,7 +924,7 @@ def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, function
         listOfVariables = [listOfVariables]
     
     #fillNos
-    if isinstance(fillNos, (int, long)):
+    if isinstance(fillNos, int):
         fillNos = [fillNos]
         # This is done so that the for loop can work properly
         
@@ -1028,7 +1028,7 @@ def LHCFillsMappingAggregation (listOfVariables, fillNos, beamModeList = None, m
     # ('duration', Timedelta('0 days 00:00:05'))]
     
     a = inspect.getargspec(LHCCals2pd)
-    defaultValues = zip(a.args[-len(a.defaults):],a.defaults)
+    defaultValues = list(zip(a.args[-len(a.defaults):],a.defaults))
     
     defaultBeamModeList = defaultValues[0][1]
     defaultFlag = defaultValues[5][1]
@@ -1042,7 +1042,7 @@ def LHCFillsMappingAggregation (listOfVariables, fillNos, beamModeList = None, m
         listOfVariables = [listOfVariables]
     
     #fillNos
-    if isinstance(fillNos, (int, long)):
+    if isinstance(fillNos, int):
         fillNos = [fillNos]
         # This is done so that the for loop can work properly
         
@@ -1157,7 +1157,7 @@ def LHCFillsMappingAggregation_v2 (listOfVariables, fillNos, beamModeList = None
     # ('duration', Timedelta('0 days 00:00:05'))]
     
     a = inspect.getargspec(LHCCals2pd)
-    defaultValues = zip(a.args[-len(a.defaults):],a.defaults)
+    defaultValues = list(zip(a.args[-len(a.defaults):],a.defaults))
     
     defaultBeamModeList = defaultValues[0][1]
     defaultFlag = defaultValues[5][1]
@@ -1171,7 +1171,7 @@ def LHCFillsMappingAggregation_v2 (listOfVariables, fillNos, beamModeList = None
         listOfVariables = [listOfVariables]
     
     #fillNos
-    if isinstance(fillNos, (int, long)):
+    if isinstance(fillNos, int):
         fillNos = [fillNos]
         # This is done so that the for loop can work properly
         
@@ -1507,7 +1507,7 @@ def dBLM2pd(fileName, bunchList,rollInterval,t1=None,t2=None):
     
     myDF=pd.DataFrame()
     
-    aux=pd.DataFrame(b.keys(),index=map(pd.Timestamp,b.keys()),columns=['KEY'] )
+    aux=pd.DataFrame(list(b.keys()),index=list(map(pd.Timestamp,list(b.keys()))),columns=['KEY'] )
     aux.index=aux.index.tz_localize('CET').tz_convert('UTC')
     if t1==None: t1=aux.index[0]
     if t2==None: t2=aux.index[-1]
