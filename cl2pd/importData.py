@@ -1547,7 +1547,7 @@ def LHCBunchLifeTimeInSquezee (noOfFill, resample_second = 60, duration_of_stabl
         b2 = a2.diff()/resample_second
         beam2DF['lifetime of bunch ' + str(i)+ ' [h]'] = - ((a2/b2).dropna())/3600
     
-return beam1DF, beam2DF
+    return beam1DF, beam2DF
 
 def bunch2SPSInjection (tree, noBunch):
     '''
