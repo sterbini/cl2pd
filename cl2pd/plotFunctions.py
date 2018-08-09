@@ -274,8 +274,7 @@ def plotBBEncounterSchedule(BBEncounterSchedule,beam,bunch,exp):
     plt.grid(ls=':')
     return plt.gca()
 
-  def LHCPlotLossRateAtSqueeze(fillNo, whichIP = 1, first = 1, last = 3564, resample_second = 60, beam1DF = None, beam2DF = None, fig = None, ax = None):
-    
+def LHCPlotLossRateAtSqueeze(fillNo, whichIP = 1, first = 1, last = 3564, resample_second = 60, beam1DF = None, beam2DF = None, fig = None, ax = None):    
     '''    
     Plots inverse function of lifetime for a single bunch in the time moment where beta functions is lowest for
     chosen IP.
