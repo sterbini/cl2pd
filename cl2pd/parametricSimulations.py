@@ -109,7 +109,7 @@ def writeUnmaskedInput(df,maskFile):
         text_file = open(df.workingDirectory+'/unmaskedInput.madx', "w")
         text_file.write(myFile)
         text_file.close()
-        return df.workingDirectory+'/unmaskedInput.madx'
+        return df.workingFolder+'/unmaskedInput.madx'
     else:
         print('Some masked parameters are not defined.')
         
