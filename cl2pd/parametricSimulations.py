@@ -106,7 +106,7 @@ def writeUnmaskedInput(df,maskFile):
             for parameter in df.index:
                 line=line.replace(parameter, str(df[parameter]));
             myFile=myFile+line;
-        text_file = open(df.workingDirectory+'/unmaskedInput.madx', "w")
+        text_file = open(df.workingFolder+'/unmaskedInput.madx', "w")
         text_file.write(myFile)
         text_file.close()
         return df.workingFolder+'/unmaskedInput.madx'
