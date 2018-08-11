@@ -96,7 +96,7 @@ def getMaskedParameterList(myFile, tag='MASKED_', printLine=False):
     return myList;
 
 def writeUnmaskedInput(df,maskFile):
-    myList=getMaskedParameter(maskFile)
+    myList=getMaskedParameterList(maskFile)
     if len(np.intersect1d(myList,df.index))==len(myList):
         searchfile = open(maskFile, "r")
         myFile=''
