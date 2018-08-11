@@ -24,7 +24,7 @@ import cl2pd # do "pip install --user git+https://github.com/sterbini/cl2pd.git"
 from cl2pd import importData
 from cl2pd import plotFunctions
 from cl2pd import dotdict
-from cl2pd import parametricSimulation
+from cl2pd import parametricSimulations
 
 import os
 import itertools
@@ -39,7 +39,7 @@ get_ipython().magic('matplotlib inline')
 
 
 MASKED_input='/eos/user/s/sterbini/MD_ANALYSIS/MADX/example/maskedInput.madx'
-getMaskedParameterList('eos/user/s/sterbini/MD_ANALYSIS/MADX/example/maskedInput.madx',printLine=True)
+parametricSimulations.getMaskedParameterList('eos/user/s/sterbini/MD_ANALYSIS/MADX/example/maskedInput.madx',printLine=True)
 
 # Definition of the parameter space
 
@@ -63,13 +63,13 @@ myParameterSpace=pd.DataFrame(myList)
 myParameterSpace['maskedInput']=MASKED_input
 
 # producing the unmasked inputs
-myParameterSpace['unmaskedInput']=myParameterSpace.apply(lambda x: writeUnmaskedInput(x,madXInput), axis=1)
+myParameterSpace['unmaskedInput']=myParameterSpace.apply(lambda x: parametricSimulations.writeUnmaskedInput(x,madXInput), axis=1)
 
 # preparing the command string
-myParameterSpace['command']=myParameterSpace.apply(writeCommand, axis=1)
+myParameterSpace['command']=myParameterSpace.apply(parametricSimulations.writeMADXCommand, axis=1)
 
 # running the simulations
-myParameterSpace.apply(runCommand, axis=1)
+myParameterSpace.apply(parametricSimulations.runCommand, axis=1)
 
 # importing the data
 outDF=importData.tfs2pd(list(myDF.apply(lambda x: x['workingDirectory']+'/output.twiss',axis=1).values))
