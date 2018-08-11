@@ -39,7 +39,7 @@ get_ipython().magic('matplotlib inline')
 
 
 MASKED_input='/eos/user/s/sterbini/MD_ANALYSIS/MADX/example/maskedInput.madx'
-parametricSimulations.getMaskedParameterList('eos/user/s/sterbini/MD_ANALYSIS/MADX/example/maskedInput.madx',printLine=True)
+parametricSimulations.getMaskedParameterList('/eos/user/s/sterbini/MD_ANALYSIS/MADX/example/maskedInput.madx',printLine=True)
 
 # Definition of the parameter space
 
@@ -78,6 +78,7 @@ outDF=importData.tfs2pd(list(myDF.apply(lambda x: x['workingDirectory']+'/output
 plt.plot(myParameterSpace.MASKED_klwire*10000,outDF.Q1-62,'o-b')
 plt.plot(myParameterSpace.MASKED_klwire*10000,outDF.Q2-60,'s-r')
 '''
+import re
 
 def getMaskedParameterList(myFile, tag='MASKED_', printLine=False):
     '''
