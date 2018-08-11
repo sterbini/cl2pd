@@ -25,7 +25,6 @@ from cl2pd import importData
 from cl2pd import plotFunctions
 from cl2pd import dotdict
 from cl2pd import parametricSimulations
-
 import os
 import itertools
 dotdict=dotdict.dotdict
@@ -51,19 +50,19 @@ myIndex=np.arange(len(parameter_klwire_list))
 
 for parameter_klwire, i in zip(parameter_klwire_list,myIndex):
     workingFolder=myWorkingRootFolder+ '/simulation_'+format(i,'04d')
-    if not os.path.exists(workingDirectory):
-        os.makedirs(workingDirectory)
+    if not os.path.exists(workingFolder):
+        os.makedirs(workingFolder)
     myList.append({'MASKED_klwire': parameter_klwire, 
                    'MASKED_fileName':'\''+workingFolder+'/output.twiss\'',
                    'standardOut':workingFolder+'/standard.out', 
-                   'workingDirectory':workingFolder,
+                   'workingFolder':workingFolder,
                   })
 
 myParameterSpace=pd.DataFrame(myList)
 myParameterSpace['maskedInput']=MASKED_input
 
 # producing the unmasked inputs
-myParameterSpace['unmaskedInput']=myParameterSpace.apply(lambda x: parametricSimulations.writeUnmaskedInput(x,madXInput), axis=1)
+myParameterSpace['unmaskedInput']=myParameterSpace.apply(lambda x: parametricSimulations.writeUnmaskedInput(x,MASKED_input), axis=1)
 
 # preparing the command string
 myParameterSpace['command']=myParameterSpace.apply(parametricSimulations.writeMADXCommand, axis=1)
@@ -72,12 +71,13 @@ myParameterSpace['command']=myParameterSpace.apply(parametricSimulations.writeMA
 myParameterSpace.apply(parametricSimulations.runCommand, axis=1)
 
 # importing the data
-outDF=importData.tfs2pd(list(myDF.apply(lambda x: x['workingDirectory']+'/output.twiss',axis=1).values))
+outDF=importData.tfs2pd(list(myParameterSpace.apply(lambda x: x['workingFolder']+'/output.twiss',axis=1).values))
 
 #Example for plotting
 plt.plot(myParameterSpace.MASKED_klwire*10000,outDF.Q1-62,'o-b')
 plt.plot(myParameterSpace.MASKED_klwire*10000,outDF.Q2-60,'s-r')
 '''
+
 import re
 import numpy as np
 import os
