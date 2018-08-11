@@ -79,6 +79,8 @@ plt.plot(myParameterSpace.MASKED_klwire*10000,outDF.Q1-62,'o-b')
 plt.plot(myParameterSpace.MASKED_klwire*10000,outDF.Q2-60,'s-r')
 '''
 import re
+import numpy as np
+import os
 
 def getMaskedParameterList(myFile, tag='MASKED_', printLine=False):
     '''
