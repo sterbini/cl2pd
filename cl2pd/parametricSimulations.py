@@ -114,7 +114,7 @@ def writeUnmaskedInput(df,maskFile):
         print('Some masked parameters are not defined.')
         
 def writeMADXCommand(df,executable='/eos/user/s/sterbini/MD_ANALYSIS/MADX/madx-linux64-gnu'):
-    return executable + ' < ' + df.unmaskedInput + ' > ' +  df.standardOut
+    return executable + ' < ' + str.replace(df.unmaskedInput,' ','\ ') + ' > ' +  str.replace(df.standardOut,' ','\ ')
 
 def runCommand(df):
     os.system(df.command)
