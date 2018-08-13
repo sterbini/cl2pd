@@ -95,7 +95,7 @@ def getMaskedParameterList(myFile, tag='MASKED_', printLine=False):
             if printLine: print(line)
             myList.append(i)
     searchfile.close()
-    return myList;
+    return np.unique(myList);
 
 def writeUnmaskedInput(df,maskFile):
     myList=getMaskedParameterList(maskFile)
