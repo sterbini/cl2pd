@@ -595,7 +595,11 @@ def _tfs2pd(myFile):
                 myColumns.append(i)
                 myList.append(myContainer)
                 
-        optics=pd.DataFrame(np.transpose(myList), index=a.S,columns=myColumns)
+        if 'S' in a.keys:
+            optics=pd.DataFrame(np.transpose(myList), index=a.S, columns=myColumns)
+        else:
+            optics=pd.DataFrame(np.transpose(myList), columns=myColumns)
+        #optics=pd.DataFrame(np.transpose(myList), index=a.S,columns=myColumns)
 
         for i in optics.columns:
             aux3= optics.iloc[0][i]
