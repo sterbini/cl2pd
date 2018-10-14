@@ -24,13 +24,16 @@ def fromName2Timestamp(myString,tz_start='CET',tz_end='UTC'):
 def importEmptyDF(folderName):
     """
     Import the list of the EPC acquisition stored in folderName.
+    ===EXAMPLE===
+    from cl2pd import noise
+    myDict=noise.importEmptyDF('/eos/project/a/abpdata/lhc/rawdata/power_converter')
     """
     myDATA=dotdict.dotdict()
-    for i in ['current','voltage']:
+    for i,j in zip(['current','voltage'],['Current','Voltage']):
       myFileList=glob.glob(folderName+'/*'+i)
       myTimestampList=[]
       for fileName in myFileList:
           myTimestampList.append(fromName2Timestamp(fileName))
-      myDATA['at'+i]=pd.DataFrame(index=myTimestampList)
-      myDATA['at'+i]['fileName']=myFileList
+      myDATA['at'+j]=pd.DataFrame(index=myTimestampList)
+      myDATA['at'+j]['fileName']=myFileList
     return myDATA
