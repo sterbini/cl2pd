@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import glob  
 import os
-import doctdict
+import dotdict
 
 def fromName2Timestamp(myString,tz_start='CET',tz_end='UTC'):
     """
