@@ -1,5 +1,10 @@
 """
-In this module we will put the functions needed for the noise analysis
+In this module we will put the functions needed for the noise analysis.
+===EXAMPLE===
+from cl2pd import noise
+myDict=noise.importEmptyDF('/eos/project/a/abpdata/lhc/rawdata/power_converter')
+myDF=myDict.atCurrent.head(5).copy()
+myDF['data']=myDF['fileName'].apply(noise.loadData)
 """
 import numpy as np
 import pandas as pd
@@ -37,3 +42,12 @@ def importEmptyDF(folderName):
       myDATA['at'+j]=pd.DataFrame(index=myTimestampList)
       myDATA['at'+j]['fileName']=myFileList
     return myDATA
+
+def loadData(fileName):
+    """
+    Load data from the fileName. It returns a numpy.ndarray.
+    ===EXAMPLE===
+    from cl2pd import noise
+    myData=noise.loadData('/eos/project/a/abpdata/lhc/rawdata/power_converter/05Oct2018_20_57_24_current')
+    """
+    return np.reshape(pd.read_csv(fileName,sep='\t',header=None).as_matrix(),1000000,1)
