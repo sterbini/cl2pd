@@ -1585,7 +1585,7 @@ def _fillBeamModes(fillDF):
         myDF['endTime']=myDF['endTime'].apply(lambda x: x.tz_localize('UTC'))
     else:
         myDF=pd.DataFrame()
-    smallDF=pd.DataFrame({'mode':['NONE'], 'startTime':[fillDF.iloc[0].startTime], 'endTime': [fillDF.iloc[1].startTime]},index=[aux.index[0]])
+    smallDF=pd.DataFrame({'mode':['NONE'], 'startTime':[fillDF.iloc[0].startTime], 'endTime': [fillDF.iloc[1].startTime]},index=[fillDF.index[0]])
     smallDF['duration']=smallDF['endTime']-smallDF['startTime']
     return (pd.concat([fillDF,myDF,smallDF])[['mode','startTime','endTime','duration']]).sort_values(by=['startTime'])
 
