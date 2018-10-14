@@ -1597,7 +1597,7 @@ def _LHCInstant(t1):
     
     ===Example===   
     t1 = pd.Timestamp('2018-05-22 02:10:15', tz='CET')
-    importData.LHCInstant(t1)
+    importData._LHCInstant(t1)
     '''
     if t1.tz==None: t1=t1.tz_localize('UTC')
     else: t1=t1.astimezone('UTC')
