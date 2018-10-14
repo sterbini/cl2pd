@@ -3,7 +3,7 @@ In this module we will put the functions needed for the noise analysis.
 ===EXAMPLE===
 from cl2pd import noise
 myDict=noise.importEmptyDF('/eos/project/a/abpdata/lhc/rawdata/power_converter')
-myDF=myDict.atCurrent.head(5).copy()
+myDF=myDict.atCurrent.head(5).copy() # one can filter in a smarter way usign the cl2pd.importData methods.
 myDF['data']=myDF['fileName'].apply(noise.loadData)
 """
 import numpy as np
