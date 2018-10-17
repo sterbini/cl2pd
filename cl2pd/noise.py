@@ -15,7 +15,7 @@ import dotdict
 def fromName2Timestamp(myString,tz_start='CET',tz_end='UTC'):
     """
     Convert a file path in a pd.Timestamp. 
-    tz_start: the initial tz
+    tz_start: the initial tz.
     tz_end: the tz of the returned pd.Timestamp.
     ====
     EXAMPLE:
