@@ -26,9 +26,10 @@ def fromName2Timestamp(myString,tz_start='CET',tz_end='UTC'):
     aa=a[:2]+'-'+a[2:5] + '-'+a[5:9]+' '
     return pd.Timestamp(aa + b+':' + c+':'+ d).tz_localize(tz_start).tz_convert(tz_end)
     
-def importEmptyDF(folderName):
+def importEmptyDF(folderName,startFile=0,endFile=-1):
     """
     Import the list of the EPC acquisition stored in folderName.
+    One can select the list of files to consider in folderName by startFile and endFile.
     ===EXAMPLE===
     from cl2pd import noise
     myDict=noise.importEmptyDF('/eos/project/a/abpdata/lhc/rawdata/power_converter')
@@ -36,6 +37,7 @@ def importEmptyDF(folderName):
     myDATA=dotdict.dotdict()
     for i,j in zip(['current','voltage'],['Current','Voltage']):
       myFileList=glob.glob(folderName+'/*'+i)
+      myFileList=myFileList[startFile:endFile]
       myTimestampList=[]
       for fileName in myFileList:
           myTimestampList.append(fromName2Timestamp(fileName))
