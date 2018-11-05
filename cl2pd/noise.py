@@ -267,3 +267,93 @@ class ADT:
         print 'Buffer: Turns = %s, Bunches = %s' %(alldat.shape[0], alldat.shape[1])
         return alldat[:]
 
+class BBQ:
+    """
+    HS BBQ data and frev interpolated. 
+    Input: a list of tuples [(t_interval1_start, t_interval1_end), (t_interval2_start, t_interval2_end)...]
+    Output: dotdict with keys :atB1H, atB2H, atB1V, atB2V
+    === EXAMPLE ===
+    time_list = [(pd.Timestamp('2018-10-25 22:43:33+00:00'), pd.Timestamp('2018-10-25 22:43:50+00:00'))  ]
+    bbq = BBQ()
+    df = bbq.getData(time_list)
+    """
+
+    def FindStatus(self,time):
+        return importData.LHCInstant(time)['mode'].values[0]
+
+    def flattenoverlap(self, v,timestamps, frf,test=100,start=0):
+      """
+      Remove overlap in BBQ data, from pytimber https://github.com/rdemaria/pytimber
+      """
+      out=[v[0]]
+      out2=[timestamps[0] for i in v[0]]
+      out3=[frf[0] for i in v[0]]
+      stat=[]
+      for j in range(1,len(v)):
+        v1=v[j-1]
+        v2=v[j]
+        newi=0
+        for i in range(start,len(v2)-test):
+          s=sum(v1[-test:]-v2[i:i+test])
+          if s==0:
+            newi=i+test
+            break
+        if newi==0:
+          print("Warning: no overlap for chunk %d,%d"%((j-1,j)))
+        out.append(v2[newi:])
+        out2.append([timestamps[j] for k in v2[newi:]])
+        out3.append([frf[j] for k in v2[newi:]])
+        stat.append(newi)
+      return np.hstack(out), np.hstack(out2), np.hstack(out3)
+
+    def getData(self, time_list, return_status = False, for_beam='both', for_plane='both', remove_overlap=False, span = 3, buffer_size=2048, skip=0):
+
+        df = dotdict.dotdict()
+        if for_beam == 'both':
+          beams  = ['B1', 'B2']
+        else:
+          beams = [for_beam]
+        if for_plane == 'both':
+          planes = ['H', 'V']
+        else:
+          planes = [for_plane]
+
+        for beam in beams:
+          for plane in planes:
+            df['at%s%s' %(beam, plane)] = pd.DataFrame()
+            var = ['LHC.BQBBQ.CONTINUOUS_HS.%s:ACQ_DATA_%s' % (beam, plane), 'ALB.SR4.%s:FGC_FREQ' % beam]
+            for time in time_list:
+              raw_data = importData.cals2pd(var, time[0], time[1])
+              if return_status:
+                raw_data['status'] = raw_data.index.map(FindStatus)
+              raw_data[var[1]] = raw_data[var[1]].interpolate(limit_direction='both')
+              raw_data['frev'] = raw_data[var[1]]/35640.
+              raw_data.dropna(subset=[var[0]], inplace=True)
+              raw_data['shape'] = raw_data[var[0]].apply(lambda x: len(x))
+              raw_data = raw_data[raw_data['shape'] == buffer_size]
+
+              if not remove_overlap:
+                df['at%s%s' %(beam, plane)] = pd.concat([df['at%s%s' %(beam, plane)], raw_data])      
+              elif not raw_data.empty:### Remove overlap
+                data = []
+                for i in raw_data[var[0]]:
+                  data.append(i)
+                to_flatten = tuple([np.array(raw_data.index), np.array(data), np.array(raw_data[var[1]])]) 
+                test={var[0]:to_flatten}
+                flatten={}
+                for name,(timestamps,values, values2) in test.items():
+                  flatten[name], timestamps2, frf2=flattenoverlap(values, timestamps, values2)
+                step=1 + skip
+                n = span*buffer_size
+                turns = np.arange(0, len(flatten[var[0]]))
+                chunk_t = [turns[x] for x in xrange(0, len(turns)-n, step)]
+                chunk_var = [flatten[var[0]][x:x+n] for x in xrange(0, len(flatten[var[0]])-n, step)]
+                chunk_time = [timestamps2[x] for x in xrange(0, len(timestamps2)-n, step)]
+                chunk_frf = [frf2[x] for x in xrange(0, len(frf2)-n, step)]
+                raw_data2 = pd.DataFrame({ var[0]:chunk_var, 'turns':chunk_t, var[1]: chunk_frf }, index=chunk_time )
+                raw_data2['frev'] = raw_data2[var[1]]/35640.
+                raw_data2['shape'] = raw_data2[var[0]].apply(lambda x: len(x))
+                df['at%s%s' %(beam, plane)]= raw_data2
+        return df 
+
+
