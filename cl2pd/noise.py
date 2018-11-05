@@ -11,6 +11,7 @@ import pandas as pd
 import glob  
 import os
 import dotdict
+import h5py as h5
 
 def fromName2Timestamp(myString,tz_start='CET',tz_end='UTC'):
     """
@@ -204,3 +205,65 @@ class DOROS:
         else:
           Data = np.fromfile(f, dtype=np.int32) 
           return pd.concat([pd.Series({'fileName': fileName}) ,self.preprocess_data(Data, key='DOS')])
+
+
+class ADT:
+    """
+    ===EXAMPLE===
+    path = '/eos/user/s/skostogl/SWAN_projects/Noise/ADTObsObox/'
+    adt = ADT(path)
+    myDict = adt.importEmptyDF
+    myDF = myDict.atB1H.copy()
+    myDF['Data'] = myDF['fileName'].apply(adt.loadData)
+    """
+    def __init__(self,folderName):
+        myDATA=dotdict.dotdict()
+        for x in (['B1H', 'B1V','B2H', 'B2V']):
+          myFileList=glob.glob(folderName + '/*%s*.h5' %x)
+          myTimestampList=[]
+          pus = []
+          status = []
+          if myFileList:
+            fills = np.unique([int(filename.split('/')[-1].split('_')[0]) for filename in myFileList])
+            df = {}
+            for fill in fills:
+                df[fill] = importData.LHCFillsByNumber(fill)
+                df[fill] = df[fill][df[fill]['mode']!='FILL']
+                df[fill] = df[fill].reset_index(drop=True)
+          for fileName in myFileList:
+            fill  = int((fileName.split('/')[-1].split('_'))[0])
+            time  = self.fromName2Timestamp(fileName.split('/')[-1])
+            status.append(self.getStatus(time,fill, df))
+            myTimestampList.append(time)
+            pus.append(self.fromName2PU(fileName.split('/')[-1]))    
+          myDATA['at'+x]=pd.DataFrame(index=np.array(myTimestampList))
+          myDATA['at'+x]['fileName']=np.array(myFileList)
+          myDATA['at'+x]['Status'] = status
+          myDATA['at'+x]['PU'] = pus
+        self.importEmptyDF = myDATA
+    
+    def getStatus(self,time,fill_number, fills):
+        df = fills[fill_number]
+        return    df[(df['startTime']<=time)  & (df['endTime']>=time)]['mode'].values[0]  
+    
+    def fromName2PU(self, myString):
+        return myString.split('/')[-1].split('_')[3]
+    
+    def fromName2Timestamp(self,myString,tz_start='CET',tz_end='UTC'):
+        [a,b]=myString.split('/')[-1].split('_')[4:]       
+        aa=a[:4]+'-'+a[4:6] + '-'+a[6:]+' '
+        bb=  b[:2] + ':' + b[3:5] + ':' + b[6:8]+' '  
+        return pd.Timestamp(aa + bb).tz_localize(tz_start).tz_convert(tz_end)    
+        
+    def loadData(self,fileName):
+        fi = h5.File(fileName, 'r')
+        beam  = (fileName.split('_')[-4])[0:2]
+        plane = (fileName.split('_')[-4])[2:3]
+        if plane == 'H':
+          plane = 'horizontal'
+        else:
+          plane = 'vertical'   
+        alldat = fi[beam][plane]
+        print 'Buffer: Turns = %s, Bunches = %s' %(alldat.shape[0], alldat.shape[1])
+        return alldat[:]
+
