@@ -25,7 +25,7 @@ def fromName2Timestamp(myString,tz_start='CET',tz_end='UTC'):
     """
     [a,b,c,d,e]=myString.split('/')[-1].split('_')
     aa=a[:2]+'-'+a[2:5] + '-'+a[5:9]+' '
-    return pd.Timestamp(aa + b+':' + c+':'+ d).tz_localize(tz_start).tz_convert(tz_end)
+    return pd.Timestamp(aa + b+':' + c+':'+ d).tz_localize(tz_start, ambiguous=True).tz_convert(tz_end)
     
 def importEmptyDF(folderName,startFile=0,endFile=-1):
     """
@@ -38,6 +38,7 @@ def importEmptyDF(folderName,startFile=0,endFile=-1):
     myDATA=dotdict.dotdict()
     for i,j in zip(['current','voltage'],['Current','Voltage']):
       myFileList=glob.glob(folderName+'/*'+i)
+      myFileList.sort(key=lambda x: fromName2Timestamp(x))
       myFileList=myFileList[startFile:endFile]
       myTimestampList=[]
       for fileName in myFileList:
@@ -54,6 +55,45 @@ def loadData(fileName):
     myData=noise.loadData('/eos/project/a/abpdata/lhc/rawdata/power_converter/05Oct2018_20_57_24_current')
     """
     return np.reshape(pd.read_csv(fileName,sep='\t',header=None).as_matrix(),1000000,1)
+
+def follow_harmonics(df):
+  """
+  Follow 50 Hz oscillation of harmonics from the average FFT 
+  """
+  fs = 50000.  
+  lim = int(0.5*fs/50)
+  t0 = df.iloc[0].name  
+  complex_fft  = [[] for j in range(lim)]
+  frequency    = [[] for j in range(lim)]
+  counter_tot  = [[] for j in range(lim)]
+  timestamp    = [[] for j in range(lim)]
+  dt           = [[] for j in range(lim)]
+  counter = 0
+  for index, row in df.iterrows():
+    print row.name
+    data    = row['data'].reshape(100,10000) ### Average of 100 acquisitions
+    fourier = np.average([abs(np.fft.fft(data[j,:])) for j in range(data.shape[0])], axis=0) 
+    fourier /=float(len(fourier))*2.0
+    freqs   = np.arange(0, len(data[0,:]))*fs/len(data[0,:])
+    counter +=1
+    for i in range(0,lim):
+      timestamp[i].append(row.name) 
+      dt[i].append( (row.name-t0).seconds/60.)
+      imin = (i+1)*50. - 10.
+      imax = (i+1)*50. + 10.
+      myfilter = (freqs>imin) & (freqs<imax)
+      idx = np.argmax(abs(fourier[myfilter]))
+      frequency[i].append(freqs[myfilter][idx])
+      complex_fft[i].append(fourier[myfilter][idx])
+      counter_tot[i].append(counter)
+  df_fft = dotdict.dotdict()
+  for harmonic in range(len(frequency)):
+    df_fft['h%s' %harmonic] = pd.DataFrame(index=timestamp[harmonic])
+    df_fft['h%s' %harmonic]['frequency'] = frequency[harmonic]
+    df_fft['h%s' %harmonic]['fourier'] = complex_fft[harmonic]
+    df_fft['h%s' %harmonic]['file_number'] = counter_tot[harmonic]
+    df_fft['h%s' %harmonic]['dt'] = dt[harmonic]
+  return df_fft
 
 class DOROS:
     """
