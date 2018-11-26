@@ -12,6 +12,7 @@ import glob
 import os
 import dotdict
 import h5py as h5
+import importData
 
 def fromName2Timestamp(myString,tz_start='CET',tz_end='UTC'):
     """
