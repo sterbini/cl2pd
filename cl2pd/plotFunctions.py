@@ -54,18 +54,23 @@ def setArrowLabel(ax, label='myLabel',arrowPosition=(0,0),labelPosition=(0,0), m
                                   fc="w", color=myColor,lw=2), 
                   )
   
-def setShadedRegion(ax,color='g' ,xLimit=[0,1],alpha=.1):
+def setShadedRegion(ax,color='g' ,xLimit=[0,1], yLimit='FullRange',alpha=.1):
     """
     setShadedRegion(ax,color='g' ,xLimit=[0,1],alpha=.1)
     ax: plot axis to use
     color: color of the shaded region
     xLimit: vector with two scalars, the start and the end point
     alpha: transparency settings
+    yLimit: if set to "FullRange" shaded the entire plot in the y direction
+    If you want to specify an intervall, please enter a two scalar vector as xLimit
     """
-    aux=ax.get_ylim()
-    plt.gca().fill_between(xLimit, 
-                       [aux[0],aux[0]],  [aux[1],aux[1]],color=color, alpha=alpha)
-    ax.set_ylim(aux)
+    if yLimit=='FullRange':
+        aux=ax.get_ylim()
+        plt.gca().fill_between(xLimit, [aux[0],aux[0]],  [aux[1],aux[1]],color=color, alpha=alpha)
+        ax.set_ylim(aux)
+    else:
+        plt.gca().fill_between(xLimit, 
+                    [yLimit[0],yLimit[0]],  [yLimit[1],yLimit[1]],color=color, alpha=alpha)
     
 def plotLHCFill(myFill,myTitle,startTime):
     """

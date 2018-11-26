@@ -595,7 +595,11 @@ def _tfs2pd(myFile):
                 myColumns.append(i)
                 myList.append(myContainer)
                 
-        optics=pd.DataFrame(np.transpose(myList), index=a.S,columns=myColumns)
+        if 'S' in a.keys:
+            optics=pd.DataFrame(np.transpose(myList), index=a.S, columns=myColumns)
+        else:
+            optics=pd.DataFrame(np.transpose(myList), columns=myColumns)
+        #optics=pd.DataFrame(np.transpose(myList), index=a.S,columns=myColumns)
 
         for i in optics.columns:
             aux3= optics.iloc[0][i]
@@ -1571,3 +1575,42 @@ def bunch2SPSInjection (tree, noBunch):
                 noOfSPS[b].append(i)
                 
     return noOfSPS
+
+def _fillBeamModes(fillDF):
+    auxNoFill=fillDF[fillDF['mode']!='FILL']
+    if len(auxNoFill)>1:
+        myDF=pd.DataFrame({'endTime':auxNoFill.iloc[1:].startTime.values, 'startTime':auxNoFill.iloc[0:-1].endTime.values,'mode':'NONE'},index=auxNoFill.iloc[1:].index)
+        myDF['duration']=myDF['endTime']-myDF['startTime']
+        myDF['startTime']=myDF['startTime'].apply(lambda x: x.tz_localize('UTC'))
+        myDF['endTime']=myDF['endTime'].apply(lambda x: x.tz_localize('UTC'))
+    else:
+        myDF=pd.DataFrame()
+    smallDF=pd.DataFrame({'mode':['NONE'], 'startTime':[fillDF.iloc[0].startTime], 'endTime': [fillDF.iloc[1].startTime]},index=[fillDF.index[0]])
+    smallDF['duration']=smallDF['endTime']-smallDF['startTime']
+    return (pd.concat([fillDF,myDF,smallDF])[['mode','startTime','endTime','duration']]).sort_values(by=['startTime'])
+
+def _LHCInstant(t1):
+    '''
+    LHCInstant(t1)
+    
+    Return the fill information at the instant t1.
+    
+    ===Example===   
+    t1 = pd.Timestamp('2018-05-22 02:10:15', tz='CET')
+    importData._LHCInstant(t1)
+    '''
+    if t1.tz==None: t1=t1.tz_localize('UTC')
+    else: t1=t1.astimezone('UTC')
+    aux=cals2pd(['HX:FILLN'],t1,'last')['HX:FILLN'].values
+    if len(aux)>0:
+        aux=LHCFillsByNumber(np.int(aux[0]))
+        aux=_fillBeamModes(aux)
+        aux=aux[aux['mode']!='FILL']
+        aux['test']=aux.apply(lambda x: x['startTime']<=t1<x['endTime'] , axis=1)
+        if len(aux)==0:
+            return pd.DataFrame();
+        aux= aux[aux['test']]
+        del aux['test']
+        return aux
+    else:
+        return pd.DataFrame()
