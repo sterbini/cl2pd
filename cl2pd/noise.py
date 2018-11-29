@@ -383,7 +383,7 @@ class BBQ:
                 test={var[0]:to_flatten}
                 flatten={}
                 for name,(timestamps,values, values2) in test.items():
-                  flatten[name], timestamps2, frf2=flattenoverlap(values, timestamps, values2)
+                  flatten[name], timestamps2, frf2=self.flattenoverlap(values, timestamps, values2)
                 step=1 + skip
                 n = span*buffer_size
                 turns = np.arange(0, len(flatten[var[0]]))
