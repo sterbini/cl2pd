@@ -397,4 +397,41 @@ class BBQ:
                 df['at%s%s' %(beam, plane)]= raw_data2
         return df 
 
-
+class HEADTAIL:
+    """
+    ===EXAMPLE===
+    path = '/eos/user/s/skostogl/SWAN_projects/Noise/Head-Tail'
+    ht = HEADTAIL(path)
+    myDict = ht.importEmptyDF
+    myDF = myDict.atB1H.copy()
+    myDF['sigma'] = myDF['fileName'].apply(ht.loadData)
+    myDF['delta'] = myDF['fileName'].apply(ht.loadData, args=('delta',))
+    """
+    def __init__(self,folderName):
+        myDATA=dotdict.dotdict()
+        for x in (['B1H', 'B1V','B2H', 'B2V']):
+          myFileList = glob.glob(folderName + '/*BQ%sT.%s*.h5' %(x[-1],x[0:2]))
+          myTimestampList=[]
+          for fileName in myFileList:
+            time  = self.fromName2Timestamp(fileName)
+            myTimestampList.append(time)   
+          myDATA['at'+x]=pd.DataFrame(index=np.array(myTimestampList))
+          myDATA['at'+x]['fileName']=np.array(myFileList)
+        self.importEmptyDF = myDATA
+    
+    def fromName2Timestamp(self,myString,tz_start='CET',tz_end='UTC'):
+        [a,b]=myString.split('/')[-1].split('_')[1:]      
+        aa=a[:4]+'-'+a[4:6] + '-'+a[6:]+' '
+        bb=  b[:2] + ':' + b[2:4] + ':' + b[4:6]+' '  
+        return pd.Timestamp(aa + bb).tz_localize(tz_start).tz_convert(tz_end)     
+        
+    def loadData(self,fileName, flag='sigma'):
+        fi = h5.File(fileName, 'r')
+        beam  = (fileName.split('_')[-3])[-2:]
+        plane = (fileName.split('_')[-3])[-5:-4]
+        if plane == 'H':
+          plane = 'horizontal'
+        else:
+          plane = 'vertical'   
+        alldat = fi[plane][flag]
+        return alldat
