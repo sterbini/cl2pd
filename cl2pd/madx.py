@@ -3,7 +3,6 @@ import pandas
 import fcntl
 import os
 import datetime
-from cl2pd import importData
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
