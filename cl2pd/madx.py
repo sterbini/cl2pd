@@ -6,6 +6,7 @@ import datetime
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+from collections import OrderedDict
 
 class _TFS:
     '''
@@ -239,7 +240,7 @@ class MadX:
     
     def buildFileFromDictionary(self,myInputDictionary,myFile="input.txt"):
         text_file = open(myFile, "w")
-        text_file.write(madx.buildInput(myInputDictionary,myInputDictionary.keys()))
+        text_file.write(self.buildInput(myInputDictionary,myInputDictionary.keys()))
         text_file.close()
    
     def buildDictionaryFromFile(self,myFile="input.txt"):
@@ -250,7 +251,7 @@ class MadX:
 
         myInputDictionaryFromFile=OrderedDict()
         myList=a.splitlines()
-        aux=[i for i, j in enumerate(myList) if j == madx.start_section[0:-3]]
+        aux=[i for i, j in enumerate(myList) if j == self.start_section[0:-3]]
 
         for i in range(len(aux)):
             myAux=aux.copy()
