@@ -195,8 +195,13 @@ class MadX:
             self.result=[]
             self.log+=['! >>> START: '+datetime.datetime.utcnow().strftime("%a %b %d %H:%M:%S.%f UTC %Y\n")]
             self.log+=[script];
-            while not ('ENDOFSCRIPT\n' in self.result):
-                self.result+=[i.decode() for i in self.p.stdout.readlines()]
+            #while not ('ENDOFSCRIPT\n' in self.result):
+            #    self.result+=[i.decode() for i in self.p.stdout.readlines()]
+            while True:
+                aux=[i.decode() for i in self.p.stdout.readlines()];
+                self.result+=aux
+                if ('ENDOFSCRIPT\n' in aux):
+                    break
             
             self.log+=self.result
             self.log+=['! <<< STOP: '+datetime.datetime.utcnow().strftime("%a %b %d %H:%M:%S.%f UTC %Y\n\n")]
