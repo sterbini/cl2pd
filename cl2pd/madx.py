@@ -189,18 +189,17 @@ class MadX:
     
     def input(self, script, verbose=True):
         try:
-            script+="print,text='ENDOFSCRIPT';\n"
+            script+="print,text='1G2U3I4D0';\n"
             self.p.stdin.write(script.encode())
             self.p.stdin.flush()
             self.result=[]
             self.log+=['! >>> START: '+datetime.datetime.utcnow().strftime("%a %b %d %H:%M:%S.%f UTC %Y\n")]
             self.log+=[script];
-            #while not ('ENDOFSCRIPT\n' in self.result):
-            #    self.result+=[i.decode() for i in self.p.stdout.readlines()]
+            
             while True:
                 aux=[i.decode() for i in self.p.stdout.readlines()];
                 self.result+=aux
-                if ('ENDOFSCRIPT\n' in aux):
+                if any('1G2U3I4D0' in mystring for mystring in aux):
                     break
             
             self.log+=self.result
