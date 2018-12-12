@@ -219,7 +219,7 @@ class MadX:
             print(i[:-1])
             
     def _clearResult(self):
-        for string in ["print,text='ENDOFSCRIPT';\n",'X:>\n','X:> ','X:> \n','X:> X:> ','X:> X:> \n','ENDOFSCRIPT\n','\n']:
+        for string in ["print,text='1G2U3I4D0';\n",'X:>\n','X:> ','X:> \n','X:> X:> ','X:> X:> \n','1G2U3I4D0\n','\n']:
             while string in self.result: self.result.remove(string)    
         
         for i in range(len(self.result)):
