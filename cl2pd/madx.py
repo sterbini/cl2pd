@@ -199,7 +199,7 @@ class MadX:
             while True:
                 aux=[i.decode() for i in self.p.stdout.readlines()];
                 self.result+=aux
-                if any('1G2U3I4D0' in mystring for mystring in aux):
+                if any('1G2U3I4D0\n' in mystring for mystring in aux):
                     break
             
             self.log+=self.result
