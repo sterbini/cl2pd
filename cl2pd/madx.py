@@ -8,148 +8,63 @@ import numpy as np
 import pandas as pd
 from collections import OrderedDict
 
-class _TFS:
-    '''
-       TFS parameters from MADX TFS output.
-       The approach used is mainly inherithed from the class TWISS suggested by H. Bartosik et al.
-    '''
-           
-    def __init__(self, filename): 
-        self.indx={}
-        self.keys=[]
-        alllabels=[]
-        #if '.gz' in filename:
-        #    f=gzip.open(filename, 'rb')
-        #else:
-        f=open(filename, 'r')
-            
-        for line in f:
-            if ("@ " not in line and "@" in line): 
-                line = replace(line, "@" , "@ ")
-            if ("@ " in line and "%" in line and "s" not in line.split()[2]) :
-                label=line.split()[1]
-                try:
-                    exec("self."+label+"= "+str(float((line.replace( '"', '')).split()[3])))
-                except:
-                    print("Problem parsing: "+ line)
-                    print("Going to be parsed as string")
-                    try:
-                        exec("self."+label+"= \""+(line.split()[3]).replace( '"', '')+"\"")
-                    except:
-                        print("Problem persits, let's ignore it!")
-            elif ("@ " in line and "s"  in line.split()[2]):
-                label=(line.split()[1]).replace(":","")
-                exec("self."+label+"= \""+(line.replace('"', '')).split()[3]+"\"")
+def _tfsFormat(myValue, myFormat):
+    if 'd' in myFormat:
+        myValue=int(myValue)
+    if 'l' in myFormat:
+        myValue=float(myValue)
+    if 's' in myFormat:
+        myValue=myValue.replace('"','')
+    return myValue
 
-            if ("* " in line or "*\t" in line) :
-                    alllabels=line.split()
-                    for j in range(1,len(alllabels)):
-                        exec("self."+alllabels[j]+"= []")
-                        self.keys.append(alllabels[j])
-                            
-            if ("$ " in line or "$\t" in line) :
-                alltypes=line.split()                
+def _tfs2pd(file_name):
+    myDictionaryComment=OrderedDict()
+    myDictionaryTableFieldName=[]
+    myDictionaryTableFieldFormat=[]
+    myDictionaryTable=OrderedDict()
+    f = open(file_name, "r")
+    for line in f: 
+        # This is a comment line
+        if line[0]=='@':
+            aux=line.split()
+            value=" ".join(str(x) for x in aux[3:])
+            myDictionaryComment[aux[1]]=_tfsFormat(value, aux[2])
 
-            if ("@" not in line and "*" not in line and "$" not in line) :
-                values=line.split()   
-                for j in range(0,len(values)):
-                    if ("%hd" in alltypes[j+1]):                      
-                        exec("self."+alllabels[j+1]+".append("+str(int(values[j]))+")")                 
-                    if ("%le" in alltypes[j+1]):                      
-                        exec("self."+alllabels[j+1]+".append("+str(float(values[j]))+")")
-                    if ("s" in alltypes[j+1]):
-                        try:
-                            exec("self."+alllabels[j+1]+".append("+values[j]+")")
-                        except:
-                            exec("self."+alllabels[j+1]+".append(\""+values[j]+"\")") #To allow with or without ""
-                        if "NAME"==alllabels[j+1]:
-                            self.indx[values[j].replace('"', '')]=len(self.NAME)-1
-                            self.indx[values[j].replace('"', '').upper()]=len(self.NAME)-1
-                            self.indx[values[j].replace('"', '').lower()]=len(self.NAME)-1
-        f.close()
-        
-        for j in range(1,len(alllabels)):
-            if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])  ):  
-                exec("self."+alllabels[j]+"= np.array(self."+alllabels[j]+")") 
+        # This is the field name
+        if line[0]=='*':
+            aux=line.split()
+            for i in aux[1:]:
+                myDictionaryTableFieldName.append(i)
 
+            for i in range(len(myDictionaryTableFieldName)):
+                myDictionaryTable[myDictionaryTableFieldName[i]]=[]
 
-def _tfs2pd(myFile):
-        '''
-        Import a MADX TFS file in a pandas dataframe.
-        
-        ===Example=== 
-        aux=importData.TFS2pd('/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey')
-        '''
-        a=_TFS(myFile);
-        aux=[]
-        aux1=[]
+        if line[0]=='$':
+            aux=line.split()
+            for i in aux[1:]:
+                myDictionaryTableFieldFormat.append(i)
 
-        for i in dir(a):
-            if not i[0]=='_':
-                if type(getattr(a,i)) is float:
-                    #print(i + ":"+ str(type(getattr(a,i))))
-                    aux.append(i)
-                    aux1.append(getattr(a,i))
-                if type(getattr(a,i)) is str:
-                    #print(i + ":"+ str(type(getattr(a,i))))
-                    aux.append(i)
-                    aux1.append(getattr(a,i))
+        if line[0]==' ':
+            aux=line.split()
+            for i in range(len(myDictionaryTableFieldName)):
+                myDictionaryTable[myDictionaryTableFieldName[i]].append(_tfsFormat(aux[i], myDictionaryTableFieldFormat[i]))
 
-        myList=[]
-        myColumns=[]
-        for i in a.keys:
-            myContainer=getattr(a, i)
-            if len(myContainer)==0:
-                print("The column "+ i + ' is empty.')
-            else:
-                myColumns.append(i)
-                myList.append(myContainer)
-                
-        if 'S' in a.keys:
-            optics=pd.DataFrame(np.transpose(myList), index=a.S, columns=myColumns)
-        else:
-            optics=pd.DataFrame(np.transpose(myList), columns=myColumns)
-        #optics=pd.DataFrame(np.transpose(myList), index=a.S,columns=myColumns)
+    f.close()
+    aux=pd.DataFrame([myDictionaryComment])
+    aux['TABLE']=[pd.DataFrame(myDictionaryTable)]
+    aux['FILE_NAME']=file_name
+    aux=aux.set_index('FILE_NAME')
+    aux.index.name=''
+    return aux
 
-        for i in optics.columns:
-            aux3= optics.iloc[0][i]
-            if type(aux3) is str:
-                aux3=str.replace(aux3, '+', '')
-                aux3=str.replace(aux3, '-', '')
-                aux3=str.replace(aux3, '.', '')
-                aux3=str.replace(aux3, 'e', '')
-                aux3=str.replace(aux3, 'E', '')
-
-
-                if aux3.isdigit():
-                    optics[i]=optics[i].apply(np.double)
-
-        aux.append('FILE_NAME')
-        aux1.append(os.path.abspath(myFile))
-
-        aux.append('TABLE')
-        aux1.append(optics)
-
-        globalDF=pd.DataFrame([aux1], columns=aux)
-        globalDF=globalDF.set_index('FILE_NAME')
-        globalDF.index.name=''
-        return globalDF 
-    
-def tfs2pd(myList):
-    '''
-        Import a MADX TFS file in a pandas dataframe.
-        
-        ===Example=== 
-        aux=importData.tfs2pd(['/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey',
-        '/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.twiss'])
-    '''
-    if isinstance(myList, list):
-        aux=[]
-        for i in np.unique(myList):
-            aux.append(_tfs2pd(i))
-        return pd.concat(aux)
+def tfs2pd(listOfFile):
+    if isinstance(listOfFile,str):
+        return _tfs2pd(listOfFile)
     else:
-        return _tfs2pd(myList)
+        aux=[]
+        for i in listOfFile:
+            aux.append(_newTFS2pd(i))
+        return pd.concat(aux)
     
 class MadX:
     '''Simple MAD-X wrapper written with the fundamental help of E. Laface (thanks a lot!).
