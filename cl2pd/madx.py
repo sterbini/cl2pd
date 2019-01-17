@@ -63,7 +63,7 @@ def tfs2pd(listOfFile):
     else:
         aux=[]
         for i in listOfFile:
-            aux.append(_newTFS2pd(i))
+            aux.append(tfs2pd(i))
         return pd.concat(aux)
     
 class MadX:
