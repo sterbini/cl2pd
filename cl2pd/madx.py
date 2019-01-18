@@ -58,6 +58,13 @@ def _tfs2pd(file_name):
     return aux
 
 def tfs2pd(listOfFile):
+    '''
+        Import a MADX TFS file in a pandas dataframe.
+        
+        ===Example=== 
+        aux=importData.tfs2pd(['/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.survey',
+        '/eos/user/s/sterbini/MD_ANALYSIS/2018/LHC MD Optics/collisionAt25cm_180urad/lhcb1_thick.twiss'])
+    '''
     if isinstance(listOfFile,str):
         return _tfs2pd(listOfFile)
     else:
