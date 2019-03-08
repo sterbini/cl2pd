@@ -10,9 +10,9 @@ import numpy as np
 import pandas as pd
 import glob  
 import os
-import dotdict
+from cl2pd import dotdict
 import h5py as h5
-import importData
+from cl2pd import importData
 
 def fromName2Timestamp(myString,tz_start='CET',tz_end='UTC'):
     """
