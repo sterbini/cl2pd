@@ -71,7 +71,7 @@ def follow_harmonics(df):
   dt           = [[] for j in range(lim)]
   counter = 0
   for index, row in df.iterrows():
-    print row.name
+    print(row.name)
     data    = row['data'].reshape(100,10000) ### Average of 100 acquisitions
     fourier = np.average([abs(np.fft.fft(data[j,:])) for j in range(data.shape[0])], axis=0) 
     fourier /=float(len(fourier))*2.0
@@ -305,7 +305,7 @@ class ADT:
         else:
           plane = 'vertical'   
         alldat = fi[beam][plane]
-        print 'Buffer: Turns = %s, Bunches = %s' %(alldat.shape[0], alldat.shape[1])
+        print('Buffer: Turns = %s, Bunches = %s' %(alldat.shape[0], alldat.shape[1]))
         return alldat[:]
 
 class BBQ:
