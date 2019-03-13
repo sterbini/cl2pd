@@ -34,7 +34,7 @@ class dotdict(dict):
         dict.__setitem__(self, key, value)
         
     def update(self, *args, **kwargs):
-        for k, v in dict(*args, **kwargs).items():
+        for k, v in list(dict(*args, **kwargs).items()):
             self[k] = v
         
     def __getstate__(self):
