@@ -264,7 +264,7 @@ def LHCFillsByNumber(fillList, verbose=False):
 
         if verbose: print(('Fill ' + str(i)))
 
-        DATA=cals.getLHCFillData(i)
+        DATA=cals.getLHCFillData(np.int(i))
 
         fillNumberList=[]
         startTimeList=[]
