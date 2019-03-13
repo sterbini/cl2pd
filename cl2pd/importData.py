@@ -129,7 +129,7 @@ def cals2pd(listOfVariables, t1, t2, fundamental='', split=1, verbose=False):
         for i in range(len(times)-1):
             if verbose: print(('Time window: '+str(i+1))) 
             aux=_noSplitcals2pd(listOfVariables,times[i],times[i+1], fundamental=fundamental, verbose=verbose)
-            myDF=pd.concat([myDF,aux])
+            myDF=pd.concat([myDF,aux], sort=True)
     return myDF.sort_index(axis=1)
 
 def cycleStamp2pd(variablesList,cycleStampList,verbose=False):
@@ -235,12 +235,12 @@ def LHCFillsByTime(t1,t2, verbose=False):
             fillsSummary['duration']='NaT'
             fillsDetails['endTime']=fillsDetails['endTime'].astype(str)
             fillsDetails['duration']=fillsDetails['duration'].astype(str)
-            out=pd.concat([fillsDetails,fillsSummary])
+            out=pd.concat([fillsDetails,fillsSummary],sort=True)
             out=out.sort_values('startTime')[['mode','startTime','endTime','duration']]
             out['endTime']=out['endTime'].apply(pd.Timestamp)
             out['duration']=out['endTime']-out['startTime']
         else:
-            out=pd.concat([fillsDetails,fillsSummary])
+            out=pd.concat([fillsDetails,fillsSummary], sort=True)
             out=out.sort_values('startTime')[['mode','startTime','endTime','duration']]    
     
     return out
@@ -300,8 +300,8 @@ def LHCFillsByNumber(fillList, verbose=False):
             aux, auxDataFrame=pd.DataFrame(),pd.DataFrame()
 
         # We concatenate the results
-        fillsSummary=pd.concat([aux,fillsSummary])
-        fillsDetails=pd.concat([auxDataFrame,fillsDetails])
+        fillsSummary=pd.concat([aux,fillsSummary], sort=True)
+        fillsDetails=pd.concat([auxDataFrame,fillsDetails], sort=True)
 
     # The timestamps are localized and the dataframes are sorted
     if len(fillsSummary):
@@ -329,13 +329,13 @@ def LHCFillsByNumber(fillList, verbose=False):
             fillsSummary['duration']='NaT'
             fillsDetails['endTime']=fillsDetails['endTime'].astype(str)
             fillsDetails['duration']=fillsDetails['duration'].astype(str)
-            aux=pd.concat([fillsDetails,fillsSummary])
+            aux=pd.concat([fillsDetails,fillsSummary], sort=True)
             aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]
             aux['endTime']=aux['endTime'].apply(pd.Timestamp)
             aux['duration']=aux['endTime']-aux['startTime']
         else:
             if len(fillsDetails)>0:
-                aux=pd.concat([fillsDetails,fillsSummary])
+                aux=pd.concat([fillsDetails,fillsSummary], sort=True)
                 aux=aux.sort_values('startTime')[['mode','startTime','endTime','duration']]    
     return aux
 
@@ -382,7 +382,7 @@ def massiFile2pd(myFileName, myUnzipPath='/tmp'):
             else:
                 print('Only lumi file implemented.')
         os.remove(i)
-    massiFile=pd.concat(pdList)
+    massiFile=pd.concat(pdList, sort=True)
     massiFile=massiFile.set_index('Timestamp')
     del massiFile.index.name
     os.rmdir(os.path.join(myUnzipPath,fillNumber))
@@ -637,7 +637,7 @@ def tfs2pd(myList):
         aux=[]
         for i in np.unique(myList):
             aux.append(_tfs2pd(i))
-        return pd.concat(aux)
+        return pd.concat(aux, sort=True)
     else:
         return _tfs2pd(myList)
     
@@ -677,7 +677,7 @@ def _LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose
     if listDF==[]:
         return pd.DataFrame()
     else:
-        return pd.concat(listDF).sort_index()
+        return pd.concat(listDF, sort=True).sort_index()
 
 def LHCInstant(t1,timeSpan_days=1):
     '''
@@ -770,7 +770,7 @@ def _LHCCals2pd_ver1(listOfVariables, fillList ,beamModeList='FILL', split=1, ve
     if listDF==[]:
         return pd.DataFrame()
     else:
-        return pd.concat(listDF).sort_index()
+        return pd.concat(listDF, sort=True).sort_index()
     
 def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=False,
                      fill_column=False, beamMode_column=False, flag='', offset=pd.Timedelta(0), duration=pd.Timedelta('5s')):
@@ -824,7 +824,7 @@ def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=
         if listDF==[]:
             return pd.DataFrame()
         else:
-            return pd.concat(listDF).sort_index()
+            return pd.concat(listDF, sort=True).sort_index()
         
     if (flag=='last') or (flag=='next'):
         for fill in fillList: 
@@ -848,7 +848,7 @@ def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=
         if listDF==[]:
             return pd.DataFrame()
         else:
-            return pd.concat(listDF).sort_index()
+            return pd.concat(listDF, sort=True).sort_index()
         
     if (flag=='duration'):
         for fill in fillList: 
@@ -872,7 +872,7 @@ def LHCCals2pd(listOfVariables, fillList ,beamModeList='FILL', split=1, verbose=
         if listDF==[]:
             return pd.DataFrame()
         else:
-            return pd.concat(listDF).sort_index()
+            return pd.concat(listDF, sort=True).sort_index()
 
 def LHCFillsAggregation (listOfVariables, fillNos, beamModeList = None, functionList = None, mapInsteadAgg = False, flag = None, offset = None, duration = None):
     '''
@@ -1587,7 +1587,7 @@ def _fillBeamModes(fillDF):
         myDF=pd.DataFrame()
     smallDF=pd.DataFrame({'mode':['NONE'], 'startTime':[fillDF.iloc[0].startTime], 'endTime': [fillDF.iloc[1].startTime]},index=[fillDF.index[0]])
     smallDF['duration']=smallDF['endTime']-smallDF['startTime']
-    return (pd.concat([fillDF,myDF,smallDF])[['mode','startTime','endTime','duration']]).sort_values(by=['startTime'])
+    return (pd.concat([fillDF,myDF,smallDF], sort=True)[['mode','startTime','endTime','duration']]).sort_values(by=['startTime'])
 
 def _LHCInstant(t1):
     '''
