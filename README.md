@@ -24,7 +24,7 @@ pip install --upgrade --user git+https://github.com/sterbini/cl2pd.git@fork_name
 ## Example notebook 
 Please have a look to this example file
 
-/eos/user/s/sterbini/MD_ANALYSIS/cl2pdExaple.ipynb 
+/eos/user/s/sterbini/MD_ANALYSIS/cl2pdExample.ipynb 
 
 or follow the link
 
