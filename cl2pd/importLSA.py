@@ -8,7 +8,7 @@ t2=pd.Timestamp('2017-11-22 13:42',tz='CET')
 importLSA.LHCLsa2pd(['LHCBEAM1/QH_TRIM','LHCBEAM1/QV_TRIM'],['RAMP-6.5TeV-HIGH-BETA-V2-2017_V1@0_[START]'],t1,t2)            
 '''
 
-from . import importData
+from cl2pd import importData
 import pjlsa
 
 pd=importData.pd     # is the pandas package

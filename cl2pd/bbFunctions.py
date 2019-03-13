@@ -1,5 +1,5 @@
 import numpy as np 
-from . import dotdict
+from cl2pd import dotdict
 import pandas as pd
 dotdict=dotdict.dotdict
 
