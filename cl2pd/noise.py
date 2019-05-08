@@ -285,7 +285,11 @@ class ADT:
     
     def getStatus(self,time,fill_number, fills):
         df = fills[fill_number]
-        return    df[(df['startTime']<=time)  & (df['endTime']>=time)]['mode'].values[0]  
+        try:
+          status = df[(df['startTime']<=time)  & (df['endTime']>=time)]['mode'].values[0]
+        except:
+          status = 'NOSTATUS'
+        return status
     
     def fromName2PU(self, myString):
         return myString.split('/')[-1].split('_')[3]
