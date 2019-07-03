@@ -28,7 +28,7 @@ Please have a look to this example file
 
 or follow the link
 
-https://cernbox.cern.ch/index.php/s/FwLf6IDEJ6Ypdke
+https://cernbox.cern.ch/index.php/s/2X6nUheIdfl8sFq
 
 ## Minimal example
 
