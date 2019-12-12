@@ -15,10 +15,10 @@ dotdict=dotdict.dotdict
 cals=pytimber.LoggingDB()
 
 def _switchNXCALS():
-    cals=pytimber.nxcals.NXCals()
+    return pytimber.nxcals.NXCals()
     
 def _switchCALS():
-    cals=pytimber.LoggingDB()
+    return pytimber.LoggingDB()
 
 def _smartList(myList):
     '''
