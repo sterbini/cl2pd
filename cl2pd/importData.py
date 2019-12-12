@@ -14,6 +14,12 @@ dotdict=dotdict.dotdict
 # TODO: discuss about the possible problem if the user has already defined a variable named 'cals' 
 cals=pytimber.LoggingDB()
 
+def _switchNXCALS():
+    cals=pytimber.nxcals.NXCals()
+    
+def _switchCALS():
+    cals=pytimber.LoggingDB()
+
 def _smartList(myList):
     '''
     Return a list with no duplicate and resolve the '%' search pattern.
