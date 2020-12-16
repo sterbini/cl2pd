@@ -60,7 +60,7 @@ def computeBBMatrix(numberOfLRToConsider):
             BBMatrixLHC[index-i,index]=10
 
         # HO in IP2
-        IP2slot=availableBunchSlot/4
+        IP2slot=int(availableBunchSlot/4)
         index=np.arange(availableBunchSlot-IP2slot)
         BBMatrixLHC[index,index+IP2slot]=2
         index=np.arange(availableBunchSlot-IP2slot,availableBunchSlot)
@@ -80,7 +80,7 @@ def computeBBMatrix(numberOfLRToConsider):
             BBMatrixLHC[index-i,index-(availableBunchSlot-IP2slot)]=20
 
         # HO in IP8
-        IP8slot=availableBunchSlot/4*3-3 
+        IP8slot=int(availableBunchSlot/4*3-3)
         index=np.arange(availableBunchSlot-IP8slot)
         BBMatrixLHC[index,index+IP8slot]=8
         index=np.arange(availableBunchSlot-IP8slot,availableBunchSlot)
